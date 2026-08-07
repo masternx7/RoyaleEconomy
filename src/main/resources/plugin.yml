@@ -1,0 +1,82 @@
+name: RoyaleEconomy
+author: qKing12
+description: Economy plugin
+version: "2.5"
+api-version: "1.13"
+main: me.qKing12.RoyaleEconomy.RoyaleEconomy
+folia-supported: true
+load: STARTUP
+softdepend: [ProtocolLib, PluginQuery]
+loadbefore: [Vault]
+
+commands:
+#  recurrency:
+#    permission: op
+#    description: Admin command for multi currency management
+  rec_extend_coins_maximum_value:
+    permission: op
+    description: For crazy people that need numbers bigger than 10^20
+  rec_sqlite_to_mysql:
+    permission: op
+    description: Transfers from SQLite to MySQL
+  rec_mysql_to_sqlite:
+    permission: op
+    description: Transfers from MySQL to SQLite
+  royaleeconomy_export:
+    description: Export economy players
+    aliases: [rec_export, recexport, royaleeconomyexport]
+  royaleeconomyimport_essentials:
+    permission: op
+    description: Import essentials players
+    aliases: [recimport_essentials, recimport_ess]
+  royaleeconomyimport_cmi:
+    permission: op
+    description: Import cmi players
+    aliases: [recimport_cmi]
+#  recsellall:
+#    description: Sell all command.
+#    aliases: [sellall]
+#  gambling:
+#    description: Gambling command
+#    aliases: [gamble]
+#  blackmarket:
+#    description: Black Market command
+#    aliases: [reblackmarket, recblackmarket]
+#  booster:
+#    description: Boosters command
+#    aliases: [boosters]
+#  boosteradmin:
+#    description: Boosters admin command
+#    aliases: [boostersadmin]
+#  reshop:
+#    description: Shop command for RoyaleEconomy
+#  balance:
+#    description: Check your balance
+#    aliases: [bal, purse, money, coins]
+#  balancetop:
+#    description: View top balance
+#    aliases: [baltop]
+#  pay:
+#    description: Pay someone money
+#  moneybag:
+#    aliases: [mbag, coinsbag, cbag, coinbag, moneybags, cbags, coinbags, coinsbags]
+#    description: Coin bags commands
+#  piggybank:
+#    description: Piggy bank commands
+#  retalismans:
+#    aliases: [talisman,talismans]
+#    description: Talismans commands
+#  rerewards:
+#    aliases: [recrewards]
+#    description: Time rewards
+#  killcoins:
+#    description: Stats about coins gained from killing.
+#  bank:
+#    description: Bank related commands
+#  sharedbank:
+#    description: Shared bank related commands
+#  interest:
+#    description: Interest commands
+  royaleeconomy:
+    aliases: [royaleconomy, royalec, rec, recon, reconomy, royaleecon, royalecon]
+    description: Admin commands for RoyaleEconomy

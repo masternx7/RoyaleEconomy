@@ -1,0 +1,205 @@
+package me.qKing12.RoyaleEconomy.Menus;
+
+import de.tr7zw.changeme.nbtapi.NBTItem;
+import me.qKing12.RoyaleEconomy.API.Events.PreSharedBankDepositEvent;
+import me.qKing12.RoyaleEconomy.API.Events.SharedBankDepositEvent;
+import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
+import me.qKing12.RoyaleEconomy.RoyaleEconomy;
+import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
+import me.qKing12.RoyaleEconomy.utils.Utils;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static me.qKing12.RoyaleEconomy.RoyaleEconomy.*;
+
+
+public class SharedBankDepositMenu {
+    private Inventory inventory;
+    private Double maximum_coins;
+    private Double purse;
+    private Double bankBalance;
+    private String bankID;
+
+    public SharedBankDepositMenu(Player p) {
+        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
+            if (!BankMenuCooldown.getInstance().tryAccess(p.getUniqueId()))
+                return;
+
+            bankID = dataManager.getSharedBankManager().getSharedBankId(p.getUniqueId().toString());
+            if (bankID.equals("")) {
+                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> p.closeInventory());
+                return;
+            }
+
+            maximum_coins = bankUpgradesCfg.getDouble("shared-bank-upgrades." + RoyaleEconomy.dataManager.getSharedBankManager().getSharedBankUpgrade(bankID) + ".maximum-balance");
+            purse = RoyaleEconomy.dataManager.getMoneyFromFile(p.getUniqueId().toString());
+            if (purse < 0)
+                return;
+            bankBalance = RoyaleEconomy.dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
+            if (maximum_coins == bankBalance) {
+                PlayerMessageHandler.messageSend(p, RoyaleEconomy.staticValues.bankFull);
+                return;
+            }
+
+            inventory = Bukkit.createInventory(null, RoyaleEconomy.staticValues.sharedbankDepositMenuSize, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.title")));
+            Utils.playSound(p, "menus.bank-deposit-menu-open");
+            if (RoyaleEconomy.staticValues.sharedbackgroundGlassDeposit != null)
+                for (int i = 0; i < RoyaleEconomy.staticValues.sharedbankDepositMenuSize; i++)
+                    inventory.setItem(i, staticValues.sharedbackgroundGlassDeposit);
+
+            String balance = RoyaleEconomy.messageHelper.numberFormat(bankBalance);
+
+            ArrayList<String> lore = new ArrayList<>();
+            for (String line : RoyaleEconomy.menusCfg.getStringList("shared-menus.deposit-coins-menu.go-back-item.lore"))
+                lore.add(utilsAPI.chat(p, line));
+
+            for (int slot : staticValues.sharedgoBackItemSlotDeposit)
+                inventory.setItem(slot, RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.go-back-item.item-id"), utilsAPI.chatApiOnly(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.go-back-item.name")), lore));
+
+            lore = new ArrayList<>();
+            for (String line : RoyaleEconomy.menusCfg.getStringList("shared-menus.deposit-coins-menu.custom-amount-item.lore"))
+                lore.add(utilsAPI.chat(p, line.replace("%balance%", balance).replace("%balance-limit%", RoyaleEconomy.messageHelper.numberFormat(maximum_coins))));
+
+            for (int slot : staticValues.sharedcustomAmountItemSlot)
+                inventory.setItem(slot, RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.custom-amount-item.item-id"), utilsAPI.chatApiOnly(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.custom-amount-item.name")), lore));
+
+            for (String key : RoyaleEconomy.menusCfg.getConfigurationSection("shared-menus.deposit-coins-menu.percent-items").getKeys(false)) {
+                lore = new ArrayList<>();
+                int slot = RoyaleEconomy.menusCfg.getInt("shared-menus.deposit-coins-menu.percent-items." + key + ".slot");
+                int percent = RoyaleEconomy.menusCfg.getInt("shared-menus.deposit-coins-menu.percent-items." + key + ".percent");
+
+                Double finalPercent;
+                if (percent == 100)
+                    finalPercent = purse;
+                else
+                    finalPercent = messageHelper.useDecimals ? purse / 100 * percent : Math.floor(purse / 100 * percent);
+
+                if (bankBalance + finalPercent > maximum_coins)
+                    finalPercent = maximum_coins - bankBalance;
+
+                for (String line : RoyaleEconomy.menusCfg.getStringList("shared-menus.deposit-coins-menu.percent-items." + key + ".lore"))
+                    lore.add(utilsAPI.chat(p, line
+                            .replace("%balance%", balance)
+                            .replace("%balance-limit%", RoyaleEconomy.messageHelper.numberFormat(maximum_coins))
+                            .replace("%to-deposit%", RoyaleEconomy.messageHelper.numberFormat(finalPercent))
+                    ));
+
+                ItemStack percentItem = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.percent-items." + key + ".item-id"), utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.percent-items." + key + ".name")), lore);
+                percentItem.setAmount(RoyaleEconomy.menusCfg.getInt("shared-menus.deposit-coins-menu.percent-items." + key + ".display-amount"));
+                NBTItem nbt = new NBTItem(percentItem);
+                nbt.setDouble("RoyaleEconomy", Math.floor(finalPercent * 100) / 100);
+                inventory.setItem(slot, nbt.getItem());
+            }
+
+            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("shared-bank-deposit-menu");
+            if (customItems != null) {
+                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
+                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
+            }
+
+            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
+                p.openInventory(inventory);
+                Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
+            });
+        });
+    }
+
+    private final AtomicBoolean clickCooldown = new AtomicBoolean();
+
+    private class ClickListener implements Listener {
+
+        @EventHandler
+        public void onClick(InventoryClickEvent e) {
+            if (!e.getInventory().equals(inventory))
+                return;
+            e.setCancelled(true);
+            if (clickCooldown.get()) {
+                return;
+            }
+            if (e.getSlot() < 0 || e.getCurrentItem() == null || e.getCurrentItem().getType().equals(Material.AIR)) {
+                return;
+            }
+            //if(inventory.getViewers().isEmpty()) RoyaleEconomy.plugin.getLogger().warning("A closed listener is still active.");
+            if (clickCooldown.compareAndSet(false, true)) {
+                if (!e.getClickedInventory().equals(e.getWhoClicked().getInventory())) {
+                    Player p = (Player) e.getWhoClicked();
+
+                    if (customItemsHandler.tryClick("shared-bank-deposit-menu", e.getSlot(), p)) {
+                        clickCooldown.compareAndSet(true, false);
+                        return;
+                    }
+
+                    if (staticValues.sharedgoBackItemSlotDeposit != null && staticValues.sharedgoBackItemSlotDeposit.contains(e.getSlot())) {
+                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> new SharedMainBankMenu(p));
+                    } else if (staticValues.sharedcustomAmountItemSlot != null && staticValues.sharedcustomAmountItemSlot.contains(e.getSlot())) {
+                        RoyaleEconomy.plugin.selectInputMethod(p, "deposit-coins", purse, maximum_coins, bankID);
+                        clickCooldown.compareAndSet(true, false);
+                    } else {
+                        Double amount = new NBTItem(e.getCurrentItem()).getDouble("RoyaleEconomy");
+                        if (amount != 0) {
+                            PreSharedBankDepositEvent event = new PreSharedBankDepositEvent(bankID, p, amount);
+                            Bukkit.getPluginManager().callEvent(event);
+                            if (event.isCancelled()) {
+                                clickCooldown.compareAndSet(true, false);
+                                return;
+                            }
+
+                            p.closeInventory();
+                            //RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
+                            double verifyAmount = dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
+                            if (verifyAmount != bankBalance) {
+                                p.closeInventory();
+                                if (verifyAmount == maximum_coins)
+                                    new SharedMainBankMenu(p);
+                                else
+                                    new SharedBankDepositMenu(p);
+                                return;
+                            }
+
+                            if (dataManager.removeMoneyFromFile(p.getUniqueId().toString(), amount)) {
+                                dataManager.getSharedBankManager().addSharedBankMoneyToFile(bankID, amount);
+                                if (plugin.bankLogger != null)
+                                    plugin.bankLogger.getLogger().info("[DEPOSIT SHARED] " + p.getName() + " (" + p.getUniqueId() + ")" + " deposited " + amount + " coins.");
+                                RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", amount);
+                                Utils.playSound(p, "menus.bank-deposit");
+                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.deposit-message").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
+                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, amount)));
+                            }
+                            //});
+                            if (bankBalance + amount == maximum_coins)
+                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> new SharedMainBankMenu(p), 10);
+                            else
+                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> new SharedBankDepositMenu(p), 10);
+                        } else
+                            clickCooldown.compareAndSet(true, false);
+                    }
+                } else {
+                    clickCooldown.compareAndSet(true, false);
+                }
+
+            }
+        }
+
+        @EventHandler
+        public void onClose(InventoryCloseEvent e) {
+            if (e.getInventory().equals(inventory)) {
+                inventory = null;
+                HandlerList.unregisterAll(this);
+            }
+        }
+
+    }
+}

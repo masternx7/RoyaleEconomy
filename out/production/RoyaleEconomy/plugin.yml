@@ -1,0 +1,46 @@
+name: RoyaleEconomy
+Author: qKing12
+description: Economy plugin
+version: "1.2.8"
+api-version: "1.13"
+main: me.qKing12.RoyaleEconomy.RoyaleEconomy
+load: STARTUP
+softdepend: [ProtocolLib]
+loadbefore: [Vault]
+
+commands:
+  royaleeconomyimport_essentials:
+    description: Import essentials players
+    aliases: [recimport_essentials, recimport_ess]
+  royaleeconomyimport_cmi:
+    description: Import cmi players
+    aliases: [recimport_cmi]
+  reshop:
+    description: Shop command for RoyaleEconomy
+  balance:
+    description: Check your balance
+    aliases: [bal, purse]
+  balancetop:
+    description: View top balance
+    aliases: [baltop]
+  pay:
+    description: Pay someone money
+  moneybag:
+    aliases: [mbag, coinsbag, cbag, coinbag, moneybags, cbags, coinbags, coinsbags]
+    description: Coin bags commands
+  piggybank:
+    description: Piggy bank commands
+  talismans:
+    aliases: [talisman]
+    description: Talismans commands
+  killcoins:
+    description: Stats about coins gained from killing.
+  bank:
+    description: Bank related commands
+  sharedbank:
+    description: Shared bank related commands
+  interest:
+    description: Interest commands
+  royaleeconomy:
+    aliases: [royaleconomy, royalec, rec, recon, reconomy, royaleecon, royalecon]
+    description: Admin commands for RoyaleEconomy

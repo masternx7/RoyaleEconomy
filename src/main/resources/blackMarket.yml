@@ -1,0 +1,118 @@
+use-blackmarket: false
+#Set to 'none' to disable permission
+blackmarket-permission: 'rec.blackmarket'
+#Decided this feature needs a separate permission message
+no-permission-message: '&6[Black Market] &fThis place is not for everyone! Your access has been denied.'
+blackmarket-menu-name: '&5Black Market'
+
+blackmarket-scam:
+  use: false
+  #30 chance of being scammed, meaning they won't get the item but pay the price
+  chance: 30
+  scam-message: '&6[Black Market] &fYou have been scammed! Sorry buddy, that''s how things work around here.'
+
+#If use command is set to false
+#the /blackmarket command becomes an admin command
+use-command: true
+admin-permission: 'rec.blackmarket.admin'
+
+#The number of minutes between black market items refresh
+refresh-rate: 180
+#Set to 'none' to disable the message
+#The message gets sent only to players with permission
+refresh-message: '&6[Black Market] &fThe black market has refreshed it''s stock! Come and see if you dare...'
+
+finished-stock-message: '&cThe stock for this item is finished... Be faster next time!'
+clicking-cooldown: '&cA transaction is going on right in this second. Wait for it to finish!'
+not-enough-money: '&cYou don''t have enough coins!'
+#Use %amount% and %item-name% for buying details
+buy-message: '&fThank you for buying &8%amount%x %item-name% &ffrom the &5Black Market&f!'
+full-inventory: '&cYour inventory is full!'
+
+#This message is displayed on /blackmarket refresh
+#or when /blackmarket is no longer accessible (use-limited-access-time is true)
+blackmarket-refresh: '&6[Black Market] &fThe black market will refresh it''s stock in &c%cooldown%&f!'
+
+use-limited-access-time: false
+#Time in minutes in which players can access
+#the black market. When the time ends, they will not
+#be able to access it until the next refresh
+time-to-access: 20
+
+#Item slots are where random items will appear
+#anything that is not an item slot will be set to
+#background item which you can set bellow.
+blackmarket-menu-size: 36
+close-menu-slot: 31
+close-menu-item:
+  material: '262'
+  name: '&cClose Market'
+  lore:
+    - '&7Click to close'
+    - '&7the market.'
+blackmarket-background-item: '160:15'
+blackmarket-item-slots:
+  - 10
+  - 13
+  - 16
+
+#If you have more slots, than actual items
+#this item pops up
+no-item-to-display:
+  material: '166'
+  name: '&cNo Item'
+  lore:
+    - '&7No item to'
+    - '&7display here.'
+
+#For multi-currency you can use
+#%currency-name%
+#%currency-color%
+#Example: '&7Cost: %currency-color%%price% %currency-name%'
+item-price-lore-addition:
+  - ''
+  - '&7Cost: &6%price% coins'
+
+#If item has stock:
+stock-lore-addition:
+  - '&7Remained Stock: &e%stock%'
+
+#If you remove a rarity that is asigned to an item
+#the item will be moved to the first rarity it finds
+#Rarities don't need to reach 100% combined, but they must be from 1-100
+rarities:
+  epic:
+    chance: 5
+    lore-addition:
+      - ''
+      - '&7A very rare item on'
+      - '&7the &5black market&7!'
+      - ''
+      - '&7Rarity: &5&lEPIC (5%)'
+  rare:
+    chance: 30
+    lore-addition:
+      - ''
+      - '&7A rare item on'
+      - '&7the &5black market&7!'
+      - ''
+      - '&7Rarity: &9&lRARE (30%)'
+  common:
+    chance: 50
+    lore-addition:
+      - ''
+      - '&7A common item on'
+      - '&7the &5black market&7!'
+      - ''
+      - '&7Rarity: &a&lCOMMON (50%)'
+
+# Use a item to show how much time is left
+# until the next refresh
+# Set to -1 to disable
+# Use %time% to show the time left
+refresh-item-slot: -1
+refresh-item:
+  material: '347'
+  name: '&cUntil Refresh'
+  lore:
+    - '&7Time left: &c%time%'

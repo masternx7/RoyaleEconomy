@@ -1,0 +1,102 @@
+use-time-rewards: false
+use-permission: 'none'
+deny-message: '&cYou don''t have permission to see rewards!'
+menu-name: 'Activity Rewards'
+menu-size: 54
+background-item: '160:15'
+
+close-item:
+  slot: 49
+  material: '262'
+  name: '&cClose Time Rewards'
+  lore:
+    - '&7Click to close'
+    - '&7the menu.'
+
+use-join-message: false
+on-join-message: '&6[Rewards] &fYou have unclaimed activity rewards!'
+
+sounds:
+  claim-sound: 'none'
+  #Also applies to in cooldown
+  no-permission-sound: 'none'
+  no-money: 'none'
+
+rewards:
+  #Example reward, you can add more
+  reward1:
+    slot: 10
+    items:
+      claim:
+        item: '342'
+        name: '&aReward 1'
+        lore:
+          - '&fClick to claim'
+          - '&610,000 coins&f!'
+      in-cooldown:
+        item: '328'
+        name: '&aReward 1'
+        #Use %cooldown% for the time left
+        #Use %streak% for the current claim streak (works only if streaks are enabled)
+        lore:
+          - '&fThis reward is claimed.'
+          - '&fYou can get it again'
+          - '&fin &c%cooldown%'
+      no-permission:
+        item: '407'
+        name: '&cReward 1'
+        lore:
+          - '&fThis reward contains'
+          - '&610,000 coins&f!'
+          - ''
+          - '&cYou don''t have'
+          - '&cpermission to claim this!'
+    #Time in hours
+    reset-time-hours: 24
+    #An amount of money you need to pay to claim the reward
+    money-requirements: 0
+    money-deny-message: '&6[Rewards] &fYou don''t have enough coins to claim this reward!'
+    #Required permission to see the reward in the menu
+    see-permission: 'rec.reward1.see'
+    #Required permission to claim the reward
+    claim-permission: 'rec.reward1.claim'
+    #Use %player% for the player's name
+    command-rewards:
+      - 'command1'
+      - 'give %player% diamond'
+
+use-streaks: false
+streaks:
+  #The name of the streak MUST BE IDENTICAL to the reward for it to link
+  reward1:
+    #3 times streak
+    3:
+      #This item will overwrite the normal item to show that the next claim is special
+      streak-overwrite-item: '342'
+      #Same as above, but it overwrites the cooldown item
+      streak-overwrite-item-cooldown: '328'
+      claim-message: '&6[Rewards] &fYou got some extra rewards for having a &e3 times streak&f!'
+      #This gets added to the lore when the next claim
+      #will be this streak
+      before-streak-lore:
+        - ''
+        - '&fNext time you claim'
+        - '&fyou will have an &bextra reward'
+        - '&ffor claiming &b3 times in a row&f!'
+      #Extra commands executed for the streak
+      command-rewards:
+        - 'give %player% iron_ingot'
+    #5 times streak
+    5:
+      streak-overwrite-item: '342'
+      #Same as above, but it overwrites the cooldown item
+      streak-overwrite-item-cooldown: '328'
+      claim-message: '&6[Rewards] &fYou got some extra rewards for having a &e5 times streak&f!'
+      #This gets added to the lore when the next claim
+      #will be this streak
+      before-streak-lore:
+        - '&fNext time you claim'
+        - '&fyou will have an &bextra reward'
+        - '&ffor claiming &b5 times in a row&f!'
+      command-rewards:
+        - 'give %player% gold_ingot'

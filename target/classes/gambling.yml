@@ -1,0 +1,220 @@
+use-gambling: false
+#The permission to use the gambling command
+gambling-permission: 'none'
+no-permission: '&cYou don''t have permission to gamble.'
+
+#This is either a chat message/the paper's lore in the anvil/the text on a sign
+#it depends on what the general input method is
+gambling-input-message:
+  - '^^^^^^^^^^^^^^^^'
+  - 'Enter the amount'
+  - 'you want to gamble'
+
+animation-settings:
+  #The mini-background shuffles while gambling
+  #The items below are randomly displayed
+  shuffle-background-items:
+    - '160:0'
+    - '160:1'
+    - '160:2'
+    - '160:3'
+    - '160:4'
+    - '160:5'
+    - '160:6'
+    - '160:9'
+    - '160:10'
+    - '160:11'
+    - '160:12'
+    - '160:13'
+    - '160:14'
+  winning-mini-background: '160:5'
+  losing-mini-background: '160:14'
+
+gambling-menu:
+  menu-name: '&8Gambling'
+  main-background-material: '160:15'
+  small-background-material: '160:7'
+  not-pulled-yet:
+    material: 'skull: mhf_question'
+    name: '&7???'
+    lore:
+      - '&8Try your luck'
+  #Execute commands on menu closing, leave empty for no commands
+  #Use %player% for player's name
+  closing-commands: []
+  purse-info:
+    material: '54'
+    name: '&aYour Money'
+    lore:
+      - '&fYou currently have'
+      - '&6%coins% coins &fin your'
+      - '&fpurse to gamble with.'
+  pull-item:
+    material: '69'
+    name: '&aTry your luck'
+    lore:
+      - '&fClick to &cpull&f!'
+      - ''
+      - '&fCurrently pulling with'
+      - '&6%coins% coins&f!'
+  pull-item-waiting:
+    material: '69'
+    name: '&aPulling...'
+    lore:
+      - '&fWait for the'
+      - '&fgamble result!'
+  edit-gamble:
+    material: '323'
+    name: '&aEdit amount'
+    lore:
+      - '&fYou are currently gambling'
+      - '&ffor &6%coins% coins&f.'
+      - ''
+      - '&eClick to edit'
+  player-head-info:
+    name: '&aHow to Gamble'
+    lore:
+      - '&fTo gamble in this menu'
+      - '&fyou need to enter an amount'
+      - '&fof coins and you can:'
+      - '&f  - lose everything'
+      - '&f  - double your money'
+      - '&f  - get something in between'
+  gamble-history:
+    material: '340'
+    name: '&aGamble History'
+    #Use %difference-amount% for the difference between from amount and to amount
+    #Use %percent% for the won/lost percent
+    lore-structure:
+      lost-gamble: '&cUnlucky &7| &6%from-amount% &fto &6%to-amount% &7| &e%time% ago'
+      won-gamble: '&aLucky &7| &6%from-amount% &fto &6%to-amount% &7| &e%time% ago'
+    no-history:
+      - '&7No Gambling Attempts'
+
+#The amount that is set when you open the menu
+default-gamble-amount: 1000
+minimum-gamble-amount: 500
+minimum-message: '&cYou can''t choose an amount below 500.'
+#Set to 0 to disable
+maximum-gamble-amount: 0
+maximum-message: '&cThe entered amount is too big.'
+
+#While pulling, what items should be displayed
+#on the shuffle screen
+shuffle-items:
+  - '263:0'
+  - '263:1'
+  - '265'
+  - '266'
+  - '318'
+  - '289'
+  - '348'
+  - '287'
+  - '369'
+  - '371'
+  - '388'
+  - '399'
+  - '406'
+  - '410'
+
+chances:
+  #General info
+  #Percentages should be from 1-100
+  #You can also use the percent-to-lose/win to 0 for a chance to make it a second chance, nothing happening
+  #The sum of percentages does not need to be 100
+  #You can add a "message: 'a message'" on each chance to have a custom message
+  losing:
+    chance1:
+      #The percent you lose of the entered amount
+      percent-to-lose: 15
+      #Chance of it happening
+      chance-to-happen: 30
+      #If this chance happens, the items that should be displayed are:
+      items-to-display:
+        item1: '287'
+        item2: '287'
+        item3: '318'
+    chance2:
+      percent-to-lose: 30
+      chance-to-happen: 25
+      items-to-display:
+        item1: '289'
+        item2: '263:1'
+        item3: '289'
+    chance3:
+      percent-to-lose: 50
+      chance-to-happen: 20
+      items-to-display:
+        item1: '263:1'
+        item2: '263:1'
+        item3: '287'
+    chance4:
+      percent-to-lose: 70
+      chance-to-happen: 15
+      items-to-display:
+        item1: '263:0'
+        item2: '263:0'
+        item3: '289'
+    chance5:
+      #Custom message, you can add one for any chance, otherwise the default is used
+      message: '&6[Gambling] &fSo unlucky! You lost everything :('
+      percent-to-lose: 100
+      chance-to-happen: 10
+      items-to-display:
+        item1: '263:0'
+        item2: '263:0'
+        item3: '263:0'
+  winning:
+    chance1:
+      percent-to-win: 10
+      chance-to-happen: 30
+      items-to-display:
+        item1: '265'
+        item2: '265'
+        item3: '265'
+    chance2:
+      percent-to-win: 30
+      chance-to-happen: 20
+      items-to-display:
+        item1: '266'
+        item2: '266'
+        item3: '266'
+    chance3:
+      percent-to-win: 45
+      chance-to-happen: 17
+      items-to-display:
+        item1: '388'
+        item2: '388'
+        item3: '388'
+    chance4:
+      percent-to-win: 70
+      chance-to-happen: 10
+      items-to-display:
+        item1: '264'
+        item2: '264'
+        item3: '264'
+    chance5:
+      percent-to-win: 100
+      chance-to-happen: 4
+      items-to-display:
+        item1: '399'
+        item2: '399'
+        item3: '399'
+
+
+not-enough-coins: '&cYou don''t have enough coins to gamble!'
+no-rush: '&cWait until this pull is over!'
+#Use %gamble-amount% for the entered amount for gambling
+#Use %return-amount% for the amount the player has gotten
+#Use %difference-amount% for the difference between from amount and to amount
+#Use %percent% for the won/lost percent
+default-winning-message: '&6[Gamble] &fWell done! You earned a profit. &7(&6%gamble-amount% &8-> &6%return-amount%&7)'
+default-losing-message: '&6[Gamble] &fShoot! Better luck next time. &7(&6%gamble-amount% &8-> &6%return-amount%&7)'
+
+sounds:
+  #Personal opinion: I recommend GLASS on losing, ORB_PICKUP on winning, FIRE_IGNITE while gambling
+  #the ones i suggested are fo 1.8.8 but you can look for their alternative in the upper versions
+  winning-sound: 'none'
+  losing-sound: 'none'
+  #This sound plays on loop while gambling
+  while-gambling-sound: 'none'

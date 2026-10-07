@@ -2,7 +2,6 @@ package me.qKing12.RoyaleEconomy.utils;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import org.apache.commons.lang.WordUtils;
@@ -251,14 +250,52 @@ public class Utils {
     private static Field metaProfileField;
 
     private static Object makeProfile(String b64) {
-        // random uuid based on the b64 string
-        UUID id = new UUID(
-                b64.substring(b64.length() - 20).hashCode(),
-                b64.substring(b64.length() - 10).hashCode()
-        );
-        GameProfile profile = new GameProfile(id, "Player");
-        profile.getProperties().put("textures", new Property("textures", b64));
-        return profile;
+        try {
+            UUID id = new UUID(
+                    b64.substring(Math.max(0, b64.length() - 20)).hashCode(),
+                    b64.substring(Math.max(0, b64.length() - 10)).hashCode()
+            );
+            GameProfile profile = new GameProfile(id, "Player");
+            Method getProperties = GameProfile.class.getMethod("getProperties");
+            Object properties = getProperties.invoke(profile);
+            Method put = properties.getClass().getMethod("put", Object.class, Object.class);
+            put.invoke(properties, "textures", new Property("textures", b64));
+            return profile;
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
+
+    private static boolean applyPaperSkullTexture(ItemMeta meta, String texture) {
+        try {
+            Class<?> profileClass = Class.forName("com.destroystokyo.paper.profile.PlayerProfile");
+            Method createProfileMethod = Bukkit.class.getMethod("createProfile", UUID.class);
+            Object profile = createProfileMethod.invoke(null, UUID.randomUUID());
+
+            Class<?> propertyClass = Class.forName("com.destroystokyo.paper.profile.ProfileProperty");
+            Constructor<?> propertyConstructor = propertyClass.getConstructor(String.class, String.class);
+            Object textureProperty = propertyConstructor.newInstance("textures", texture);
+            profileClass.getMethod("setProperty", propertyClass).invoke(profile, textureProperty);
+
+            Method setter = null;
+            for (Method method : meta.getClass().getMethods()) {
+                if (!method.getName().equals("setPlayerProfile") || method.getParameterCount() != 1)
+                    continue;
+                if (method.getParameterTypes()[0].isAssignableFrom(profile.getClass())) {
+                    setter = method;
+                    break;
+                }
+            }
+            if (setter == null)
+                return false;
+            setter.invoke(meta, profile);
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            return false;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return false;
+        }
     }
 
     private static final String RESOLVABLE_PROFILE_CLASS_PATH = "net.minecraft.world.item.component.ResolvableProfile";
@@ -281,11 +318,11 @@ public class Utils {
 
         ItemMeta meta = skull.getItemMeta();
 
-        GameProfile profile = new GameProfile(UUID.randomUUID(), "");
-        Property property = new Property("textures", texture);
-
-        PropertyMap properties = profile.getProperties();
-        properties.put("textures", property);
+        Object profile = makeProfile(texture);
+        if (profile == null) {
+            skull.setItemMeta(meta);
+            return skull;
+        }
         if (setProfileMethod == null) {
             try {
                 // This method only exists in versions 1.16 and up. For older versions, we use reflection
@@ -326,36 +363,16 @@ public class Utils {
                     e.printStackTrace();
                 }*/
                 try {
-                    if (Bukkit.getVersion().contains("1.21") || Bukkit.getVersion().contains("26.1")) {
-                        try {
-                            Class<?> profileClass = Class.forName("com.destroystokyo.paper.profile.PlayerProfile");
-                            Method createProfileMethod = Bukkit.class.getMethod("createProfile", UUID.class);
-                            Object profile = createProfileMethod.invoke(null, UUID.randomUUID());
-
-                            // Use reflection to set the texture property
-                            Class<?> propertyClass = Class.forName("com.destroystokyo.paper.profile.ProfileProperty");
-                            Constructor<?> propertyConstructor = propertyClass.getConstructor(String.class, String.class);
-                            Object textureProperty = propertyConstructor.newInstance("textures", texture);
-
-                            Method setPropertyMethod = profileClass.getMethod("setProperty", propertyClass);
-                            setPropertyMethod.invoke(profile, textureProperty);
-
-                            if (metaSetProfileMethod == null) {
-                                metaSetProfileMethod = meta.getClass().getDeclaredMethod("setPlayerProfile", profileClass);
-                                metaSetProfileMethod.setAccessible(true);
-                            }
-                            metaSetProfileMethod.invoke(meta, profile);
-                        } catch (ClassNotFoundException x) {
-                            return getSkullNonPaperSpigot(texture);
-                        }
-                    } else {
+                    if (!applyPaperSkullTexture(meta, texture)) {
                         if (metaSetProfileMethod == null) {
                             metaSetProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
                             metaSetProfileMethod.setAccessible(true);
                         }
-                        metaSetProfileMethod.invoke(meta, makeProfile(texture));
+                        Object profile = makeProfile(texture);
+                        if (profile != null)
+                            metaSetProfileMethod.invoke(meta, profile);
                     }
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+                } catch (Throwable ex) {
                     // if in an older API where there is no setProfile method,
                     // we set the profile field directly.
                     try {
@@ -372,7 +389,7 @@ public class Utils {
                 skull.setItemMeta(meta);
                 return skull;
 
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         } else {

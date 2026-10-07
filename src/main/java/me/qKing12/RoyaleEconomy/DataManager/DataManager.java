@@ -1,7 +1,6 @@
 package me.qKing12.RoyaleEconomy.DataManager;
 
 import com.tcoded.folialib.wrapper.task.WrappedTask;
-import me.qKing12.RoyaleEconomy.DataManager.SellLimitGlobal.ISellLimitGlobal;
 import me.qKing12.RoyaleEconomy.DataManager.SharedBank.SharedBank;
 import org.bukkit.entity.Player;
 
@@ -10,8 +9,6 @@ import java.util.List;
 
 
 public interface DataManager {
-
-    ISellLimitGlobal getSellLimit();
 
     void createCurrency(String currencyId);
 

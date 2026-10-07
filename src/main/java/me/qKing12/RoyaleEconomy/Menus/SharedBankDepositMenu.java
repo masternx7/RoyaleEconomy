@@ -3,7 +3,6 @@ package me.qKing12.RoyaleEconomy.Menus;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.qKing12.RoyaleEconomy.API.Events.PreSharedBankDepositEvent;
 import me.qKing12.RoyaleEconomy.API.Events.SharedBankDepositEvent;
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
 import me.qKing12.RoyaleEconomy.utils.Utils;
@@ -19,8 +18,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.*;
@@ -104,12 +101,6 @@ public class SharedBankDepositMenu {
                 inventory.setItem(slot, nbt.getItem());
             }
 
-            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("shared-bank-deposit-menu");
-            if (customItems != null) {
-                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
-                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
-            }
-
             RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
@@ -136,11 +127,6 @@ public class SharedBankDepositMenu {
             if (clickCooldown.compareAndSet(false, true)) {
                 if (!e.getClickedInventory().equals(e.getWhoClicked().getInventory())) {
                     Player p = (Player) e.getWhoClicked();
-
-                    if (customItemsHandler.tryClick("shared-bank-deposit-menu", e.getSlot(), p)) {
-                        clickCooldown.compareAndSet(true, false);
-                        return;
-                    }
 
                     if (staticValues.sharedgoBackItemSlotDeposit != null && staticValues.sharedgoBackItemSlotDeposit.contains(e.getSlot())) {
                         RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> new SharedMainBankMenu(p));

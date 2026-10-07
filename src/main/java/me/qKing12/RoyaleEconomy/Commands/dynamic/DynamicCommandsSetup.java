@@ -2,7 +2,6 @@ package me.qKing12.RoyaleEconomy.Commands.dynamic;
 
 import me.qKing12.RoyaleEconomy.Commands.*;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
-import me.qKing12.RoyaleEconomy.Shops.SellAll.SellAllManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -28,15 +27,6 @@ public class DynamicCommandsSetup {
     }
 
     public DynamicCommandsSetup() {
-        commandSettings.put("reshop", new ReShopCommand());
-        commandSettings.put("balance", new BalanceCommand());
-        commandSettings.put("balancetop", new BalanceTopCommand());
-        commandSettings.put("pay", new PayCommand());
-        commandSettings.put("moneybag", new MoneyBagCommand());
-        if(RoyaleEconomy.plugin.getConfig().getBoolean("piggy-bank.use-piggy-banks"))
-            commandSettings.put("piggybank", new PiggyBankCommand());
-        if(RoyaleEconomy.coinBagsAndTalismansCfg.getBoolean("talismans.use-talismans"))
-            commandSettings.put("talismans", new Talismans());
         if(RoyaleEconomy.plugin.getConfig().getBoolean("use-only-one-bank"))
             commandSettings.put("bank", new OnlyBankCommand());
         else

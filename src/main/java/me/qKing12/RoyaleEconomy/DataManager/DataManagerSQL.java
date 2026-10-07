@@ -1,14 +1,10 @@
 package me.qKing12.RoyaleEconomy.DataManager;
 
-import com.Zrips.CMI.CMI;
-import com.Zrips.CMI.Containers.CMIUser;
 import com.tcoded.folialib.wrapper.task.WrappedTask;
 import me.qKing12.RoyaleEconomy.API.Events.CoinsAddToPurseEvent;
 import me.qKing12.RoyaleEconomy.API.Events.CoinsRemoveFromPurseEvent;
 import me.qKing12.RoyaleEconomy.Commands.InterestCommand;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.PlayerMoneyCacheSQL;
-import me.qKing12.RoyaleEconomy.DataManager.SellLimitGlobal.ISellLimitGlobal;
-import me.qKing12.RoyaleEconomy.DataManager.SellLimitGlobal.SellLimitGlobalSQL;
 import me.qKing12.RoyaleEconomy.DataManager.SharedBank.SharedBank;
 import me.qKing12.RoyaleEconomy.DataManager.SharedBank.SharedBankSQL;
 import me.qKing12.RoyaleEconomy.Economy.VaultHook;
@@ -45,13 +41,6 @@ public class DataManagerSQL implements DataManager {
     @Override
     public SharedBank getSharedBankManager() {
         return sharedBank;
-    }
-
-    private ISellLimitGlobal sellLimitGlobal = new SellLimitGlobalSQL();
-
-    @Override
-    public ISellLimitGlobal getSellLimit() {
-        return sellLimitGlobal;
     }
 
     public DataManagerSQL(boolean noEconomy) {
@@ -541,49 +530,8 @@ public class DataManagerSQL implements DataManager {
     }
 
     public void importCMI() {
-        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
-            try (
-                    Connection Database = HikariCPDataSource.getConnection();
-                    PreparedStatement u = Database.prepareStatement(
-                            "INSERT OR IGNORE INTO PlayerPurse VALUES (?, ? ,0, '')"
-                    );
-
-                    PreparedStatement u1 = Database.prepareStatement(
-                            "UPDATE PlayerPurse SET coins = ? WHERE id = ?"
-                    );
-
-                    PreparedStatement u2 = Database.prepareStatement(
-                            "INSERT OR IGNORE INTO PersonalBank VALUES (?, " + RoyaleEconomy.staticValues.defaultBankCoins + " ," + 0 + ", '')"
-                    );
-            ) {
-                Database.setAutoCommit(false);
-                for (CMIUser player : CMI.getInstance().getPlayerManager().getAllUsers().values()) {
-                    String uuid = player.getUniqueId().toString();
-                    String name = player.getName();
-                    double coins = player.getBalance();
-
-                    u.setString(1, uuid);
-                    u.setString(2, name);
-                    u1.setDouble(1, coins);
-                    u1.setString(2, uuid);
-                    u2.setString(1, uuid);
-                    u.addBatch();
-                    u1.addBatch();
-                    u2.addBatch();
-                }
-
-                u.executeBatch();
-                u1.executeBatch();
-                u2.executeBatch();
-                Database.commit();
-                Database.setAutoCommit(true);
-                playerMoneyCache.reloadBalances();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        RoyaleEconomy.plugin.getLogger().warning("CMI import is not included in this build.");
     }
-
     public void setBankMoney(String player, double amount) {
         if (((PlayerMoneyCacheSQL) playerMoneyCache).setBalanceBank(player, amount)) {
             return;

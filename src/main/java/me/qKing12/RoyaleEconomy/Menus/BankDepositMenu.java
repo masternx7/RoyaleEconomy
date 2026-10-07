@@ -3,7 +3,6 @@ package me.qKing12.RoyaleEconomy.Menus;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.qKing12.RoyaleEconomy.API.Events.BankDepositEvent;
 import me.qKing12.RoyaleEconomy.API.Events.PreBankDepositEvent;
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
 import me.qKing12.RoyaleEconomy.DataManager.StaticValues;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
@@ -20,8 +19,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.*;
@@ -101,12 +98,6 @@ public class BankDepositMenu  {
                 inventory.setItem(slot, nbt.getItem());
             }
 
-            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("personal-bank-deposit-menu");
-            if(customItems!=null) {
-                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
-                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
-            }
-
             RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
@@ -133,11 +124,6 @@ public class BankDepositMenu  {
             if(clickCooldown.compareAndSet(false, true)) {
                 if (!e.getClickedInventory().equals(e.getWhoClicked().getInventory())) {
                     Player p = (Player) e.getWhoClicked();
-
-                    if(customItemsHandler.tryClick("personal-bank-deposit-menu", e.getSlot(), p)){
-                        clickCooldown.compareAndSet(true,false);
-                        return;
-                    }
 
                     if (staticValues.goBackItemSlotDeposit != null && staticValues.goBackItemSlotDeposit.contains(e.getSlot())) {
                         RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> new MainBankMenu(p));

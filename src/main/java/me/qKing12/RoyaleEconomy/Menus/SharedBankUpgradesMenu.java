@@ -1,6 +1,5 @@
 package me.qKing12.RoyaleEconomy.Menus;
 
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
 import me.qKing12.RoyaleEconomy.DataManager.StaticValues;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
@@ -20,8 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.*;
 
@@ -105,12 +102,6 @@ public class SharedBankUpgradesMenu {
                 inventory.setItem(slot, toDisplay);
             }
 
-            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("shared-bank-upgrades-menu");
-            if(customItems!=null) {
-                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
-                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
-            }
-
             RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
@@ -132,10 +123,6 @@ public class SharedBankUpgradesMenu {
             //if(inventory.getViewers().isEmpty()) RoyaleEconomy.plugin.getLogger().warning("A closed listener is still active.");
                 if(!e.getClickedInventory().equals(e.getWhoClicked().getInventory())){
                     Player p = (Player) e.getWhoClicked();
-
-                    if(customItemsHandler.tryClick("shared-bank-upgrades-menu", e.getSlot(), p)){
-                        return;
-                    }
 
                     if(staticValues.sharedgoBackItemSlot != null && staticValues.sharedgoBackItemSlot.contains(e.getSlot())){
                         if(menusCfg.contains("shared-menus.bank-upgrades-menu.go-back-item.commands")){

@@ -3,8 +3,6 @@ package me.qKing12.RoyaleEconomy.DataManager.Cache;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import me.qKing12.RoyaleEconomy.DataManager.DataManagerMySQL;
-import me.qKing12.RoyaleEconomy.MultiCurrency.internal.Currency;
-import me.qKing12.RoyaleEconomy.MultiCurrency.internal.MultiCurrencyHandler;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
 import me.qKing12.RoyaleEconomy.utils.Utils;

@@ -181,38 +181,10 @@ public class StaticValues {
     }
 
     public void loadValues(){
-        disableBuyBack = RoyaleEconomy.shopsCfg.getBoolean("disable-buyback", false);
-
-        blackMarketRefreshItemSlot=loadSlots(RoyaleEconomy.blackMarketCfg, "refresh-item-slot");
-        if (RoyaleEconomy.blackMarketCfg.contains("refresh-item-slot") && !blackMarketRefreshItemSlot.isEmpty() && blackMarketRefreshItemSlot.get(0) != -1) {
-            ArrayList<String> lore = new ArrayList<>();
-            for (String line : RoyaleEconomy.blackMarketCfg.getStringList("refresh-item.lore"))
-                lore.add(Utils.chat(line));
-            blackMarketRefreshItem = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.blackMarketCfg.getString("refresh-item.material"), Utils.chat(RoyaleEconomy.blackMarketCfg.getString("refresh-item.name")), lore);
-        }
-
         onlineInterestOnly=RoyaleEconomy.plugin.getConfig().getBoolean("interest-online-only");
-        killCoinsMessagesOn=Utils.chat(RoyaleEconomy.commandsCfg.getString("commands.killcoins.messages-on"));
-        killCoinsMessagesOff=Utils.chat(RoyaleEconomy.commandsCfg.getString("commands.killcoins.messages-off"));
 
         balanceTopMaximumPages=RoyaleEconomy.commandsCfg.getInt("commands.balancetop.maximum-pages");
         balanceTopDisplayPerPage = RoyaleEconomy.commandsCfg.getInt("commands.balancetop.display-per-page");
-
-        togglePayOn=Utils.chat(RoyaleEconomy.commandsCfg.getString("commands.pay.toggle-on"));
-        togglePayOff=Utils.chat(RoyaleEconomy.commandsCfg.getString("commands.pay.toggle-off"));
-        toggleMessage=Utils.chat(RoyaleEconomy.commandsCfg.getString("commands.pay.toggle-message"));
-
-        useShopBackItem=RoyaleEconomy.shopsCfg.getBoolean("main-go-back-item.use-go-back");
-        ArrayList<String> lore;
-        if(useShopBackItem) {
-            shopBackItemSlot = loadSlots(RoyaleEconomy.shopsCfg, "main-go-back-item.slot");
-            shopBackItemCommands = (ArrayList<String>) RoyaleEconomy.shopsCfg.getStringList("main-go-back-item.commands");
-
-            lore = new ArrayList<>();
-            for (String line : RoyaleEconomy.shopsCfg.getStringList("main-go-back-item.lore"))
-                lore.add(Utils.chat(line));
-            shopBackItem = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.shopsCfg.getString("main-go-back-item.material"), Utils.chat(RoyaleEconomy.shopsCfg.getString("main-go-back-item.name")), lore);
-        }
 
         FileConfiguration config = RoyaleEconomy.plugin.getConfig();
 
@@ -446,167 +418,13 @@ public class StaticValues {
         moneyBagItem= Utils.getSkull(RoyaleEconomy.coinBagsAndTalismansCfg.getString("money-bags.money-bag-skin"));
         ItemMeta meta = moneyBagItem.getItemMeta();
         meta.setDisplayName(Utils.chat(RoyaleEconomy.coinBagsAndTalismansCfg.getString("money-bags.money-bag-name")));
-        lore = new ArrayList<>();
+        ArrayList<String> lore = new ArrayList<>();
         for(String line : RoyaleEconomy.coinBagsAndTalismansCfg.getStringList("money-bags.money-bag-lore"))
             lore.add(Utils.chat(line));
         meta.setLore(lore);
         moneyBagItem.setItemMeta(meta);
-
-        lore=new ArrayList<>();
-        lore.add(Utils.chat("&fGo back to"));
-        lore.add(Utils.chat("&fmanage shops menu!"));
-        goBackShopEdit = RoyaleEconomy.itemConstructor.getItem("262", Utils.chat("&aGo Back"), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&fChange the color of"));
-        lore.add(Utils.chat("&fbackground glass from"));
-        lore.add(Utils.chat("&fthis shop."));
-        colorChange = Utils.getSkull("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzIyNzY3MGQxNDg3OTQ5MTUzMDQ4MjdiMGViMDNlZmYyNzNjYTE1M2Y4NzRkYjVlOTA5NGQxY2RiYjYyNThhMiJ9fX0");
-        meta = colorChange.getItemMeta();
-        meta.setDisplayName(Utils.chat("&aChange Colors"));
-        meta.setLore(lore);
-        colorChange.setItemMeta(meta);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&bDouble Click &fto delete"));
-        lore.add(Utils.chat("&fthis shop from existance."));
-        lore.add("");
-        lore.add(Utils.chat("&cNOT REVERSIBLE!"));
-        deleteShop= RoyaleEconomy.itemConstructor.getItem("166", Utils.chat("&cDelete Shop"), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&bDouble Click &fto delete"));
-        lore.add(Utils.chat("&fthis item from existance."));
-        lore.add("");
-        lore.add(Utils.chat("&cNOT REVERSIBLE!"));
-        deleteShopItem= RoyaleEconomy.itemConstructor.getItem("166", Utils.chat("&cDelete Item"), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&fClick to rename this shop."));
-        lore.add(Utils.chat("&fIt will also change the"));
-        lore.add(Utils.chat("&ffile name too."));
-        renameShop= RoyaleEconomy.itemConstructor.getItem("340", Utils.chat("&aRename Shop"), lore);
-
-
-        lore = new ArrayList<>();
-        for(String line : RoyaleEconomy.shopsCfg.getStringList("next-page-item.lore"))
-            lore.add(Utils.chat(line));
-        nextPageShopItem = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.shopsCfg.getString("next-page-item.material"), Utils.chat(RoyaleEconomy.shopsCfg.getString("next-page-item.name")), lore);
-
-        lore = new ArrayList<>();
-        for(String line : RoyaleEconomy.shopsCfg.getStringList("previous-page-item.lore"))
-            lore.add(Utils.chat(line));
-        previousPageShopItem = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.shopsCfg.getString("previous-page-item.material"), Utils.chat(RoyaleEconomy.shopsCfg.getString("previous-page-item.name")), lore);
-
-        lore = new ArrayList<>();
-        for(String line : RoyaleEconomy.shopsCfg.getStringList("go-back-item.lore"))
-            lore.add(Utils.chat(line));
-        goBackShopItem = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.shopsCfg.getString("go-back-item.material"), Utils.chat(RoyaleEconomy.shopsCfg.getString("go-back-item.name")), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&bClick &fto change"));
-        lore.add(Utils.chat("&fthe selling value of"));
-        lore.add(Utils.chat("&bone &fitem!"));
-        lore.add("");
-        lore.add(Utils.chat("&fSet this to 0 to"));
-        lore.add(Utils.chat("&fdisable selling for"));
-        lore.add(Utils.chat("&fthis item."));
-        sellValue = RoyaleEconomy.itemConstructor.getItem("265", " ", lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&bClick &fto change"));
-        lore.add(Utils.chat("&fthe permission needed"));
-        lore.add(Utils.chat("&fto buy this item!"));
-        buyPermissionItem = RoyaleEconomy.itemConstructor.getItem("331", " ", lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&bClick &fto change"));
-        lore.add(Utils.chat("&fthe buying value of"));
-        lore.add(Utils.chat("&bone &fitem!"));
-        buyValue = RoyaleEconomy.itemConstructor.getItem("266", " ", lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&fThe shop will be very strict"));
-        lore.add(Utils.chat("&fat selling &bthis item&f."));
-        lore.add("");
-        lore.add(Utils.chat("&fLore,Name and even NBT need"));
-        lore.add(Utils.chat("&fto be the same so you can"));
-        lore.add(Utils.chat("&fsell this item."));
-        lore.add("");
-        lore.add(Utils.chat("&eClick to deactivate!"));
-        detailed = RoyaleEconomy.itemConstructor.getItem("351:10", Utils.chat("&aDetailed"), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&fThe shop will not be strict"));
-        lore.add(Utils.chat("&fat selling &bthis item&f."));
-        lore.add("");
-        lore.add(Utils.chat("&fThe only thing that should be"));
-        lore.add(Utils.chat("&fthe same is the material."));
-        lore.add("");
-        lore.add(Utils.chat("&fDetailed mode checks for more."));
-        lore.add("");
-        lore.add(Utils.chat("&eClick to activate!"));
-        notDetailed = RoyaleEconomy.itemConstructor.getItem("351:8", Utils.chat("&7Not Detailed"), lore);
-
-        lore=new ArrayList<>();
-        lore.add(Utils.chat("&fIf you set the item as"));
-        lore.add(Utils.chat("&bexclusive &fit will be sold"));
-        lore.add(Utils.chat("&fonly in this shop!"));
-        lore.add("");
-        lore.add(Utils.chat("&eClick to activate!"));
-        notExclusive=RoyaleEconomy.itemConstructor.getItem("263", Utils.chat("&fExclusive: &cDISABLED"), lore);
-
-        lore=new ArrayList<>();
-        lore.add(Utils.chat("&fIf you set the item as"));
-        lore.add(Utils.chat("&bexclusive &fit will be sold"));
-        lore.add(Utils.chat("&fonly in this shop!"));
-        lore.add("");
-        lore.add(Utils.chat("&eClick to deactivate!"));
-        exclusive=RoyaleEconomy.itemConstructor.getItem("264", Utils.chat("&fExclusive: &aENABLED"), lore);
-
-        lore=new ArrayList<>();
-        lore.add(Utils.chat("&bClick &fto edit"));
-        lore.add(Utils.chat("&fthe closing commands"));
-        lore.add(Utils.chat("&fof this shop!"));
-        shopCloseCommands=RoyaleEconomy.itemConstructor.getItem("137", Utils.chat("&cClose Commands"), lore);
-
-        lore = new ArrayList<>();
-        for(String line : RoyaleEconomy.shopsCfg.getStringList("sell-item.lore"))
-            lore.add(Utils.chat(line));
-        sellItemsGetBack = RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.shopsCfg.getString("sell-item.material"), Utils.chat(RoyaleEconomy.shopsCfg.getString("sell-item.name")), lore);
-
-        piggyBank= Utils.getSkull(RoyaleEconomy.plugin.getConfig().getString("piggy-bank.texture"));
-        meta = piggyBank.getItemMeta();
-        meta.setDisplayName(Utils.chat(RoyaleEconomy.plugin.getConfig().getString("piggy-bank.name")));
-        lore=new ArrayList<>();
-        for(String line : RoyaleEconomy.plugin.getConfig().getStringList("piggy-bank.lore"))
-            lore.add(Utils.chat(line));
-        meta.setLore(lore);
-        piggyBank.setItemMeta(meta);
-        piggyBankCooldown= RoyaleEconomy.plugin.getConfig().getInt("piggy-bank.cooldown");
-
-        lore=new ArrayList<>();
-        lore.add(Utils.chat("&fIf you set the item as"));
-        lore.add(Utils.chat("&bexclusive &fit will be sold"));
-        lore.add(Utils.chat("&fonly in this shop!"));
-        lore.add("");
-        lore.add(Utils.chat("&eClick to deactivate!"));
-        exclusive=RoyaleEconomy.itemConstructor.getItem(Material.BOOK, Utils.chat("&fExclusive: &aENABLED"), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&fIf you click on this item you will disable"));
-        lore.add(Utils.chat("&fthe detailed menu mode. This means that"));
-        lore.add(Utils.chat("&fthe player will be able to buy the item"));
-        lore.add(Utils.chat("&ffrom the shop detailed menu only."));
-        detailedMenuModeNotOnly = RoyaleEconomy.itemConstructor.getItem(Material.BOOK, Utils.chat("&aDetailed Menu Force Mode (Inactive)"), lore);
-
-        lore = new ArrayList<>();
-        lore.add(Utils.chat("&fIf you click on this item you will enable"));
-        lore.add(Utils.chat("&fthe detailed menu mode. This means that"));
-        lore.add(Utils.chat("&fthe player will be able to buy the item"));
-        lore.add(Utils.chat("&ffrom the shop main menu too."));
-        detaimedMenuModeOnly = RoyaleEconomy.itemConstructor.getItem(Material.BARRIER, Utils.chat("&cDetailed Menu Force Mode (Active)"), lore);
     }
+
 
     public StaticValues(){
         loadValues();

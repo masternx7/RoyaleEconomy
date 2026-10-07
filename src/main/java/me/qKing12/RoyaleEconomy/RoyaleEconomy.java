@@ -1,18 +1,12 @@
 package me.qKing12.RoyaleEconomy;
 
-import com.Zrips.CMI.CMI;
 import com.earth2me.essentials.Essentials;
 import com.tcoded.folialib.FoliaLib;
 import de.rapha149.signgui.SignGUI;
 import me.qKing12.RoyaleEconomy.API.APIHandler;
 import me.qKing12.RoyaleEconomy.API.Events.*;
-import me.qKing12.RoyaleEconomy.BlackMarket.BlackMarket;
-import me.qKing12.RoyaleEconomy.BlackMarket.BlackMarketCommand;
-import me.qKing12.RoyaleEconomy.BlackMarket.BlackMarketMenu;
-import me.qKing12.RoyaleEconomy.Boosters.*;
 import me.qKing12.RoyaleEconomy.Commands.*;
 import me.qKing12.RoyaleEconomy.Commands.dynamic.DynamicCommandsSetup;
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItemsHandler;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.PlayerMoneyCache;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.PlayerMoneyCacheMySQL;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.PlayerMoneyCacheSQL;
@@ -20,23 +14,11 @@ import me.qKing12.RoyaleEconomy.DataManager.*;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.redis.RedisHandler;
 import me.qKing12.RoyaleEconomy.Economy.BalanceTopNoEconomy;
 import me.qKing12.RoyaleEconomy.Events.Events;
-import me.qKing12.RoyaleEconomy.Gambling.Gambling;
-import me.qKing12.RoyaleEconomy.Gambling.GamblingCommand;
 import me.qKing12.RoyaleEconomy.Hooks.*;
-import me.qKing12.RoyaleEconomy.Hooks.TradeMe.TradeMeHook;
 import me.qKing12.RoyaleEconomy.Hooks.bStats.Metrics;
 import me.qKing12.RoyaleEconomy.InputGUIs.ChatListener;
-import me.qKing12.RoyaleEconomy.KillCoins.KillCoinsMainHandle;
-import me.qKing12.RoyaleEconomy.KillCoins.MythicMobsHook;
 import me.qKing12.RoyaleEconomy.Menus.*;
-import me.qKing12.RoyaleEconomy.MultiCurrency.internal.MultiCurrencyHandler;
 import me.qKing12.RoyaleEconomy.PlaceholderAPISupport.*;
-import me.qKing12.RoyaleEconomy.Shops.SellAll.SellAllManager;
-import me.qKing12.RoyaleEconomy.Shops.ShopBuyLimit;
-import me.qKing12.RoyaleEconomy.Shops.ShopPlayerCache;
-import me.qKing12.RoyaleEconomy.Shops.ShopSellLimit;
-import me.qKing12.RoyaleEconomy.Shops.ShopsLoad;
-import me.qKing12.RoyaleEconomy.TimeRewards.TimeRewardsManager;
 import me.qKing12.RoyaleEconomy.utils.*;
 import net.milkbowl.vault.economy.Economy;
 import net.wesjd.anvilgui.AnvilGUI;
@@ -60,9 +42,6 @@ import java.util.Collections;
 public class RoyaleEconomy extends JavaPlugin implements Listener {
 
     public static RoyaleEconomy plugin;
-    public TimeRewardsManager timeRewardsManager;
-
-    public static CustomItemsHandler customItemsHandler;
 
     public static DataManager dataManager;
 
@@ -73,28 +52,15 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
     public static MessageHelper messageHelper;
     public static ItemConstructor itemConstructor;
     public static PlaceholderAPISupport utilsAPI;
-    public static TalismanHandler talismanHandler;
-    public static KillCoinsMainHandle killCoinsMainHandle;
     public static boolean upperVersion;
     public static SharedBankHook hooked;
-    public static Boosters boosters;
 
     public static FileConfiguration bankUpgradesCfg;
     public static FileConfiguration coinBagsAndTalismansCfg;
     public static FileConfiguration commandsCfg;
-    public static FileConfiguration killCoinsAndPurseDeathCfg;
     public static FileConfiguration menusCfg;
-    public static FileConfiguration shopsCfg;
     public static FileConfiguration permissionsCfg;
     public static FileConfiguration soundsCfg;
-    public static FileConfiguration boostersCfg;
-    public static FileConfiguration blackMarketCfg;
-    public static FileConfiguration gamblingCfg;
-    public static FileConfiguration timeRewardsCfg;
-    public static FileConfiguration multiCurrencyCfg;
-
-    public static FileConfiguration multiCurrencyShopsCfg;
-    public static FileConfiguration customItemsCfg;
 
     public static APIHandler apiHandler;
 
@@ -103,7 +69,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
     }
 
     private boolean searchSkyBlockHook;
-    private boolean searchOtherPluginsHook;
 
     public static boolean noEconomy;
     public BalanceTopNoEconomy balanceTopNoEconomy;
@@ -145,16 +110,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                 }
             }
         }
-        else if(e.getPlugin().getName().equals("CMI")){
-            if(noEconomy)
-                balanceTopNoEconomy.cmi=CMI.getInstance();
-        }
-        else if(e.getPlugin().getName().equalsIgnoreCase("MythicMobs")){
-            if(RoyaleEconomy.killCoinsAndPurseDeathCfg.getBoolean("kill-coins.use-kill-coins")) {
-                new MythicMobsHook();
-                getLogger().info("Hooked into MythicMobs");
-            }
-        }
         else if(searchSkyBlockHook) {
             if (e.getPlugin().getName().equals("SuperiorSkyblock2")) {
                 new SuperiorSkyBlock();
@@ -163,30 +118,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
             else if (e.getPlugin().getName().equals("BentoBox")) {
                 new BentoBox();
                 getLogger().info("Hooked into BentoBox");
-            }
-            else if(e.getPlugin().getName().equals("FabledSkyBlock")){
-                new FabledSkyBlock();
-                getLogger().info("Hooked into FabledSkyBlock");
-            }
-            else if(e.getPlugin().getName().equals("IridiumSkyBlock")){
-                new IridiumSkyBlock();
-                getLogger().info("Hooked into IridiumSkyBlock");
-            }
-            else if(e.getPlugin().getName().equals("GalacticSkyBlock")){
-                new GalacticSkyBlock();
-                getLogger().info("Hooked into GalacticSkyBlock");
-            }
-        }
-        else if(searchOtherPluginsHook){
-            try {
-                if (e.getPlugin().getName().equals("TradeMe")) {
-                    if(RoyaleEconomy.multiCurrencyCfg.getBoolean("use-multicurrency")) {
-                        new TradeMeHook();
-                        getLogger().info("Hooked into TradeMe with MultiCurrency");
-                    }
-                }
-            }catch(Exception x){
-
             }
         }
         /*else if(searchOtherPluginsHook){
@@ -638,37 +569,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         }
     }
 
-    public void setupBoosters(){
-        if(boostersCfg.getBoolean("use-boosters")) {
-            boosters = new BoostersActive();
-            new BoosterCommand();
-            new BoosterAdmin();
-        }
-        else{
-            boosters=new DisabledBoosters();
-        }
-    }
-
-    public void setupBlackMarket(){
-        if(blackMarketCfg.getBoolean("use-blackmarket")){
-            new BlackMarket();
-            new BlackMarketCommand();
-        }
-    }
-
-    public void setupGambling(){
-        if(gamblingCfg.getBoolean("use-gambling")){
-            new Gambling();
-            new GamblingCommand();
-        }
-    }
-
-    public void setupTimeRewards(){
-        if(timeRewardsCfg.getBoolean("use-time-rewards")){
-            timeRewardsManager=new TimeRewardsManager();
-        }
-    }
-
     public static DisabledCommand disabledCommand;
 
     public BankLogger bankLogger;
@@ -688,12 +588,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
             getLogger().info("Update detected, triggered file conversion...");
             new UpdateFiles();
             saveDefaultConfig();
-            killCoinsAndPurseDeathCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "killCoinsAndPurseDeath.yml"));
-            shopsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "shops.yml"));
-            permissionsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "permissions.yml"));
-            commandsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "commands.yml"));
-            menusCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "menus.yml"));
-            boostersCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "boosters.yml"));
+            UpdateFiles.loadFiles();
         }
         TermsOfUse terms = new TermsOfUse();
         if(!terms.getAccepted())
@@ -707,7 +602,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         }
 
         searchSkyBlockHook=getConfig().getBoolean("search-skyblock-hook");
-        searchOtherPluginsHook=getConfig().getBoolean("other-plugins-hook");
         Bukkit.getPluginManager().registerEvents(this, this);
         new Metrics(this, 8598);
         File directory = new File(this.getDataFolder(), "database");
@@ -716,7 +610,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
 
         setupDataManager();
         setupItemConstructor();
-        customItemsHandler = new CustomItemsHandler();
 
         Bukkit.getPluginManager().registerEvents(BankMenuCooldown.getInstance(), this);
 
@@ -724,49 +617,8 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         staticValues=new StaticValues();
         new PlayerMessageHandler();
         messageHelper=new MessageHelper();
-        talismanHandler=new TalismanHandler();
-
-
-        if(RoyaleEconomy.killCoinsAndPurseDeathCfg.getBoolean("kill-coins.use-kill-coins")) {
-            killCoinsMainHandle = new KillCoinsMainHandle();
-            new KillCoinsCommand();
-        }
-
-        new ShopsLoad();
-        new ShopPlayerCache();
-        new MultiCurrencyHandler();
 
         new AdminCommands();
-        /*
-        try {
-            new BalanceCommand();
-        }catch(Exception x){
-
-        }
-        if(this.getConfig().getBoolean("use-only-one-bank"))
-            new OnlyBankCommand();
-        else
-            new BankCommand();
-        if(getConfig().getBoolean("use-interest"))
-            new InterestCommand();
-        try{
-            new PayCommand();
-        }catch(Exception x){
-
-        }
-        try {
-            new BalanceTopCommand();
-        }catch(Exception x){
-
-        }
-        new MoneyBagCommand();
-        if(RoyaleEconomy.coinBagsAndTalismansCfg.getBoolean("talismans.use-talismans"))
-            new Talismans();
-        else
-            getCommand("retalismans").setExecutor(disabledCommand);
-        new SharedBankCommand();
-        new ReShopCommand();
-         */
 
         if(noEconomy){
             new ExportCommand();
@@ -775,12 +627,9 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         }
         else {
             new EssentialsImport();
-            new CMIImport();
+            getCommand("royaleeconomyimport_cmi").setExecutor(disabledCommand);
             getCommand("royaleeconomy_export").setExecutor(disabledCommand);
         }
-
-        //if(getConfig().getBoolean("piggy-bank.use-piggy-banks"))
-        //    new PiggyBankCommand();
 
         if( Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if(utilsAPI==null) {
@@ -798,11 +647,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         else
             utilsAPI=new PlaceholderAPISupportNo();
 
-        if(shopsCfg.getBoolean("shop-sell-limit.use"))
-            new ShopSellLimit();
-        if(shopsCfg.getBoolean("shop-buy-limit.use"))
-            new ShopBuyLimit();
-
         if(searchSkyBlockHook) {
 
             if (Bukkit.getPluginManager().getPlugin("SuperiorSkyblock2") != null) {
@@ -812,18 +656,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
             else if (Bukkit.getPluginManager().getPlugin("BentoBox") != null) {
                 new BentoBox();
                 getLogger().info("Hooked into BentoBox");
-            }
-            else if(Bukkit.getPluginManager().getPlugin("FabledSkyBlock")!=null){
-                new FabledSkyBlock();
-                getLogger().info("Hooked into FabledSkyBlock");
-            }
-            else if(Bukkit.getPluginManager().getPlugin("IridiumSkyBlock")!=null){
-                new IridiumSkyBlock();
-                getLogger().info("Hooked into IridiumSkyBlock");
-            }
-            else if(Bukkit.getPluginManager().getPlugin("GalacticSkyBlock")!=null){
-                new GalacticSkyBlock();
-                getLogger().info("Hooked into GalacticSkyBlock");
             }
         }
         /*else if(searchOtherPluginsHook){
@@ -850,11 +682,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
 
         apiHandler=new APIHandler();
         new Events();
-        setupBoosters();
-        setupBlackMarket();
-        setupGambling();
-        setupTimeRewards();
-        new SellAllManager();
 
         new TransferFunctions();
 
@@ -868,22 +695,9 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         DynamicCommandsSetup.unregisterCommands();
         if(bankLogger != null)
             bankLogger.cleanup();
-        if (killCoinsMainHandle != null)
-            if (killCoinsAndPurseDeathCfg.getBoolean("kill-coins.use-kill-coins"))
-                killCoinsMainHandle.killCoins.saveData();
-        if(ShopBuyLimit.playerValues!=null)
-            ShopBuyLimit.saveData();
-        ShopSellLimit.saveLimits();
         if(playerMoneyCache !=null) {
             playerMoneyCache.finalSave();
             getLogger().info("Safety save of user balances done!");
-        }
-        if(BlackMarket.refreshCheck!=null)
-            BlackMarketMenu.saveCache();
-        try {
-            PayCommand.saveToFile();
-        }catch(Exception x){
-
         }
         RedisHandler.close();
         getLogger().info("Plugin disabled!");

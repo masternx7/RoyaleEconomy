@@ -8,9 +8,6 @@ import me.qKing12.RoyaleEconomy.Menus.MainBankMenu;
 import me.qKing12.RoyaleEconomy.Menus.SharedBankUpgradesMenu;
 import me.qKing12.RoyaleEconomy.Menus.SharedMainBankMenu;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
-import me.qKing12.RoyaleEconomy.Shops.Shop;
-import me.qKing12.RoyaleEconomy.Shops.ShopManagerMenu;
-import me.qKing12.RoyaleEconomy.Shops.ShopsLoad;
 import me.qKing12.RoyaleEconomy.utils.GenerateFiles;
 import me.qKing12.RoyaleEconomy.utils.PermissionChecker;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
@@ -47,8 +44,6 @@ public class AdminCommands implements TabExecutor {
         if(args.length==1) {
             if(PermissionChecker.checkPermissionSilent("commands.royaleeconomy.reload-permission", sender))
                 values.add("reload");
-            if(PermissionChecker.checkPermissionSilent("commands.royaleeconomy.shops-permission", sender))
-                values.add("shop");
             if(PermissionChecker.checkPermissionSilent("commands.royaleeconomy.purse-permission", sender))
                 values.add("purse");
             if(PermissionChecker.checkPermissionSilent("commands.royaleeconomy.bank-permission", sender))
@@ -66,10 +61,6 @@ public class AdminCommands implements TabExecutor {
                 values.addAll(Arrays.asList("add", "set", "setUpgrade", "remove", "forceopen", "transactionlog"));
             else if(args[0].equalsIgnoreCase("sharedbank") && PermissionChecker.checkPermissionSilent("commands.royaleeconomy.sharedbank-permission", sender))
                 values.addAll(Arrays.asList("add", "set", "setUpgrade", "remove", "forceopen", "delete", "transactionlog", "create"));
-            else if(args[0].equalsIgnoreCase("shops") || args[0].equalsIgnoreCase("shop")) {
-                if (PermissionChecker.checkPermissionSilent("commands.royaleeconomy.shops-permission", sender))
-                    values.addAll(Arrays.asList("create", "manager", "sortSellItems", "reload", "list"));
-            }
             return StringUtil.copyPartialMatches(args[1], values, new ArrayList<>());
         }
         return null;
@@ -78,7 +69,6 @@ public class AdminCommands implements TabExecutor {
     public AdminCommands(){
         RoyaleEconomy.plugin.getCommand("royaleeconomy").setExecutor(this);
         RoyaleEconomy.plugin.getCommand("royaleeconomy").setTabCompleter(this);
-        new CommandBooster();
     }
 
     @Override
@@ -115,49 +105,6 @@ public class AdminCommands implements TabExecutor {
                             return true;
                         }
                     }
-                }
-                else if(args[0].equalsIgnoreCase("shop") || args[0].equalsIgnoreCase("shops")){
-                    if(PermissionChecker.checkPermission("commands.royaleeconomy.shops-permission", p)) {
-                        if (args.length > 1) {
-                            if (args[1].equalsIgnoreCase("refreshItemsVersion")){
-                                for (Shop shop : ShopsLoad.shops) {
-                                    for (Shop.ShopItem item : shop.getItems()) {
-                                        item.addToConfiguration();
-                                    }
-                                    shop.saveConfig();
-                                }
-                                PlayerMessageHandler.messageSend(p, Utils.chat("&aRefreshed items to current version."));
-                                return true;
-                            }
-                            else if (args[1].equalsIgnoreCase("create")) {
-                                new Shop(null, p);
-                                return true;
-                            }else if(args[1].equals("list")) {
-                                PlayerMessageHandler.messageSend(p, Utils.chat("&fShops list:"));
-                                for(Shop shop : ShopsLoad.shops){
-                                    PlayerMessageHandler.messageSend(p, Utils.chat("  &a- "+shop.getShopName()));
-                                }
-                                return true;
-                            }else if (args[1].equals("manager")) {
-                                new ShopManagerMenu(p);
-                                return true;
-                            } else if (args[1].equalsIgnoreCase("sortSellItems")) {
-                                ShopsLoad.sortItems();
-                                PlayerMessageHandler.messageSend(p, Utils.chat("&aResorted selling items to give detailed items priority."));
-                                return true;
-                            }
-                            else if(args[1].equalsIgnoreCase("reload")){
-                                ShopsLoad.loadShopItems();
-                                ShopsLoad.sortItems();
-                                PlayerMessageHandler.messageSend(p, Utils.chat("&aReloaded items from file."));
-                                return true;
-                            }
-                        }
-
-                        for (String line : RoyaleEconomy.commandsCfg.getStringList("commands.royaleeconomy.shops.command-help"))
-                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, line));
-                    }
-                    return true;
                 }
                 else if(args[0].equalsIgnoreCase("purse")){
                     if(PermissionChecker.checkPermission("commands.royaleeconomy.purse-permission", p)) {
@@ -204,10 +151,7 @@ public class AdminCommands implements TabExecutor {
                                                             boolean sendMessage=true;
                                                             if(args.length>4){
                                                                 for(int i=4; i<args.length; i++){
-                                                                    if (args[i].equalsIgnoreCase("-applyBooster")) {
-                                                                        toAdd = CommandBooster.getAmountWithBooster(p2, toAdd);
-                                                                    }
-                                                                    else if(args[i].equalsIgnoreCase("-silent")){
+                                                                    if(args[i].equalsIgnoreCase("-silent")){
                                                                         sendMessage=false;
                                                                     }
                                                                 }
@@ -856,10 +800,7 @@ public class AdminCommands implements TabExecutor {
                                                         boolean sendMessage=true;
                                                         if(args.length>4){
                                                             for(int i=4; i<args.length; i++){
-                                                                if(args[i].equalsIgnoreCase("-applyBooster")){
-                                                                        toAdd = CommandBooster.getAmountWithBooster(p2, toAdd);
-                                                                }
-                                                                else if(args[i].equalsIgnoreCase("-silent")){
+                                                                if(args[i].equalsIgnoreCase("-silent")){
                                                                     sendMessage=false;
                                                                 }
                                                             }

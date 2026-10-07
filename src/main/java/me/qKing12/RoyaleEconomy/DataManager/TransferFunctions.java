@@ -1,7 +1,5 @@
 package me.qKing12.RoyaleEconomy.DataManager;
 
-import me.qKing12.RoyaleEconomy.MultiCurrency.Currency;
-import me.qKing12.RoyaleEconomy.MultiCurrency.MultiCurrencyHandler;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.Utils;
 import org.bukkit.Bukkit;
@@ -40,11 +38,6 @@ public class TransferFunctions implements CommandExecutor {
                 statement.addBatch("DELETE FROM "+DataManagerMySQL.database+".PersonalBank");
                 statement.addBatch("DELETE FROM "+RoyaleEconomy.dataManager.getSharedBankManager().getTable());
                 statement.addBatch("DELETE FROM "+DataManagerMySQL.database+".ExternalGeneratedData");
-                if (MultiCurrencyHandler.getCurrencies() != null) {
-                    for (me.qKing12.RoyaleEconomy.API.Currency currency : MultiCurrencyHandler.getCurrencies()) {
-                        statement.addBatch("DELETE FROM " + DataManagerMySQL.database + ".RoyaleEconomy" + currency.getCurrencyId());
-                    }
-                }
                 statement.executeBatch();
             }catch (Exception x){
                 sender.sendMessage(Utils.chat("&cCouldn't clear MySQL Data... Abandoning Transfer"));
@@ -109,56 +102,6 @@ public class TransferFunctions implements CommandExecutor {
                 stmt2.executeBatch();
                 stmt3.executeBatch();
                 stmt4.executeBatch();
-                connectionMySQL.setAutoCommit(true);
-            }catch (Exception x){
-                x.printStackTrace();
-                sender.sendMessage(Utils.chat("&cImport failed."));
-                return;
-            }
-            sender.sendMessage(Utils.chat("&aImport done!"));
-        }
-    }
-
-    void transferFromSQLiteToMySQL(CommandSender sender, String currencyId){
-        Currency currency = MultiCurrencyHandler.findCurrencyById(currencyId);
-        if (currency == null) {
-            sender.sendMessage(Utils.chat("&cCurrency not found."));
-            return;
-        }
-
-        File sqlBase = new File(RoyaleEconomy.plugin.getDataFolder(), "database/royaleEconomyData.db");
-        if(!sqlBase.exists()){
-            sender.sendMessage(Utils.chat("&cThe SQL Database does not exist. Nothing to transfer from."));
-        }
-        else if(!RoyaleEconomy.plugin.getConfig().getBoolean("mysql.use-mysql")){
-            sender.sendMessage(Utils.chat("&cMySQL is not connected. No location to transfer to."));
-        }
-        else{
-            sender.sendMessage(Utils.chat("&aClearing MySQL Data..."));
-
-            try(Connection connection = HikariCPDataSource.getConnection();
-                Statement statement = connection.createStatement();
-            ){
-                statement.execute("DELETE FROM "+DataManagerMySQL.database+".RoyaleEconomy"+currencyId);
-            }catch (Exception x){
-                sender.sendMessage(Utils.chat("&cCouldn't clear MySQL Data... Abandoning Transfer"));
-                x.printStackTrace();
-                return;
-            }
-            sender.sendMessage(Utils.chat("&aMySql Cleared! Importing data..."));
-            try(Connection connectionMySQL = HikariCPDataSource.getConnection();
-                Connection connectionSQLite = DriverManager.getConnection("jdbc:sqlite:" + RoyaleEconomy.plugin.getDataFolder() + "/database/royaleEconomyData.db");
-                ResultSet currencyBalances = connectionSQLite.prepareStatement("SELECT * FROM " + DataManagerMySQL.database+".RoyaleEconomy"+currencyId).executeQuery();
-                PreparedStatement stmt1 = connectionMySQL.prepareStatement("INSERT INTO "+DataManagerMySQL.database+".RoyaleEconomy"+currency+" VALUES (?, ?)");
-            ) {
-                connectionMySQL.setAutoCommit(false);
-                while (currencyBalances.next()) {
-                    stmt1.setString(1, currencyBalances.getString(1));
-                    stmt1.setDouble(2, currencyBalances.getDouble(2));
-                    stmt1.addBatch();
-                }
-
-                stmt1.executeBatch();
                 connectionMySQL.setAutoCommit(true);
             }catch (Exception x){
                 x.printStackTrace();
@@ -254,55 +197,9 @@ public class TransferFunctions implements CommandExecutor {
         }
     }
 
-    void transferFromMySQLToSQLite(CommandSender sender, String currencyId){
-        Currency currency = MultiCurrencyHandler.findCurrencyById(currencyId);
-        if (currency == null) {
-            sender.sendMessage(Utils.chat("&cCurrency not found."));
-            return;
-        }
-
-        File sqlBase = new File(RoyaleEconomy.plugin.getDataFolder(), "database/royaleEconomyData.db");
-        if(!RoyaleEconomy.plugin.getConfig().getBoolean("mysql.use-mysql")){
-            sender.sendMessage(Utils.chat("&cMySQL is not connected. No location to transfer to."));
-        }
-        else{
-            sender.sendMessage(Utils.chat("&aRegenerating SQLite File..."));
-            if(sqlBase.exists()){
-                sqlBase.delete();
-                try {
-                    sqlBase.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            new SQLLoad();
-            sender.sendMessage(Utils.chat("&aSQLite Data Cleared! Importing data..."));
-            try(Connection connectionMySQL = HikariCPDataSource.getConnection();
-                Connection connectionSQLite = DriverManager.getConnection("jdbc:sqlite:" + RoyaleEconomy.plugin.getDataFolder() + "/database/royaleEconomyData.db");
-                ResultSet currencyBalances = connectionMySQL.prepareStatement("SELECT * FROM "+DataManagerMySQL.database+".RoyaleEconomy"+currencyId).executeQuery();
-                PreparedStatement stmt1 = connectionSQLite.prepareStatement("INSERT INTO RoyaleEconomy"+currencyId+" VALUES (?, ?)");
-            ){
-                connectionSQLite.setAutoCommit(false);
-                while(currencyBalances.next()){
-                    stmt1.setString(1, currencyBalances.getString(1));
-                    stmt1.setDouble(2, currencyBalances.getDouble(2));
-                    stmt1.addBatch();
-                }
-
-                stmt1.executeBatch();
-                connectionSQLite.setAutoCommit(true);
-            }catch (Exception x){
-                x.printStackTrace();
-                sender.sendMessage(Utils.chat("&cImport failed."));
-                return;
-            }
-            sender.sendMessage(Utils.chat("&aImport done!"));
-        }
-    }
 
     private static boolean confirmSqliteToMysql=false;
     private static boolean confirmMySQLtoSqlite=false;
-    private static String currencyId = null;
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -311,20 +208,12 @@ public class TransferFunctions implements CommandExecutor {
             return false;
         }
 
-        if (args.length > 1) {
-            if (args[0].equals("currency")) {
-                currencyId = args[1];
-            }
-        }
-
         if(label.equalsIgnoreCase("rec_sqlite_to_mysql")){
             if(args.length>0){
                 if(args[0].equalsIgnoreCase("confirm") && confirmSqliteToMysql){
-                    if (currencyId != null) transferFromSQLiteToMySQL(sender, currencyId);
-                    else transferFromSQLiteToMySQL(sender);
+                    transferFromSQLiteToMySQL(sender);
 
                     confirmSqliteToMysql=false;
-                    currencyId = null;
                     return false;
                 }
             }
@@ -337,10 +226,8 @@ public class TransferFunctions implements CommandExecutor {
         else {
             if(args.length>0){
                 if(args[0].equalsIgnoreCase("confirm") && confirmMySQLtoSqlite){
-                    if (currencyId != null) transferFromMySQLToSQLite(sender, currencyId);
-                    else transferFromMySQLToSQLite(sender);
+                    transferFromMySQLToSQLite(sender);
                     confirmMySQLtoSqlite=false;
-                    currencyId = null;
                     return false;
                 }
             }

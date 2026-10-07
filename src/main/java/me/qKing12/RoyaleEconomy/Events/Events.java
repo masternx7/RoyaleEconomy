@@ -2,7 +2,6 @@ package me.qKing12.RoyaleEconomy.Events;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
-import me.qKing12.RoyaleEconomy.Shops.ShopPlayerCache;
 import me.qKing12.RoyaleEconomy.utils.PermissionChecker;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
 import me.qKing12.RoyaleEconomy.utils.Utils;
@@ -13,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,11 +23,6 @@ public class Events implements Listener {
 
     public Events(){
         Bukkit.getPluginManager().registerEvents(this, RoyaleEconomy.plugin);
-        if(RoyaleEconomy.killCoinsAndPurseDeathCfg.getBoolean("purse-coins-handle.use-purse-coins-death")){
-            new PurseDeathEvent();
-        }
-        if(RoyaleEconomy.coinBagsAndTalismansCfg.getBoolean("talismans.use-talismans"))
-            new TalismansEvents();
     }
 
     @EventHandler
@@ -59,11 +52,6 @@ public class Events implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         RoyaleEconomy.dataManager.updateUsername(e.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent e){
-        ShopPlayerCache.shopHistory.remove(e.getPlayer());
     }
 
 }

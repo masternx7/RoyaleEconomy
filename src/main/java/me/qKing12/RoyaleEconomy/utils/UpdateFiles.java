@@ -12,20 +12,9 @@ public class UpdateFiles {
         RoyaleEconomy.bankUpgradesCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "bankUpgrades.yml"));
         RoyaleEconomy.coinBagsAndTalismansCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "coinBagsAndTalismans.yml"));
         RoyaleEconomy.commandsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "commands.yml"));
-        RoyaleEconomy.killCoinsAndPurseDeathCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "killCoinsAndPurseDeath.yml"));
         RoyaleEconomy.menusCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "menus.yml"));
-        RoyaleEconomy.shopsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "shops.yml"));
         RoyaleEconomy.permissionsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "permissions.yml"));
         RoyaleEconomy.soundsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "sounds.yml"));
-        RoyaleEconomy.boostersCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "boosters.yml"));
-        RoyaleEconomy.blackMarketCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "blackMarket.yml"));
-        RoyaleEconomy.gamblingCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "gambling.yml"));
-        RoyaleEconomy.timeRewardsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "timeRewards.yml"));
-
-        RoyaleEconomy.multiCurrencyCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "multiCurrency.yml"));
-        RoyaleEconomy.multiCurrencyShopsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "multiCurrencyShops.yml"));
-
-        RoyaleEconomy.customItemsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "customMenuItems.yml"));
     }
 
     public UpdateFiles(){
@@ -92,100 +81,6 @@ public class UpdateFiles {
             outFile.renameTo(inFile);
 
 
-            //------------------------------------------------
-
-            inFile = new File(RoyaleEconomy.plugin.getDataFolder(), "multiCurrency.yml");
-
-            // input
-            fis = new FileInputStream(inFile);
-            in = new BufferedReader(new InputStreamReader(fis, Charsets.UTF_8));
-
-            // output
-            fos = new FileOutputStream(outFile);
-            out = new PrintWriter(new OutputStreamWriter(fos, Charsets.UTF_8));
-
-            keys = RoyaleEconomy.multiCurrencyCfg.getKeys(true);
-
-
-            while ((thisLine = in.readLine()) != null) {
-                out.println(thisLine);
-                if(thisLine.equalsIgnoreCase("currency-exchange-menu:") && !keys.contains("currency-exchange-menu.exchange-currency-submenu")){
-                    out.println("  exchange-currency-submenu:");
-                    out.println("    name: '&8Exchange Currency'");
-                    out.println("    slots: 27");
-                    out.println("    background-item: '160:15'");
-                    out.println("    buy-currency:");
-                    out.println("      slot: 10");
-                    out.println("      item: '342'");
-                    out.println("      name: '&aBuy %currency-name%'");
-                    out.println("      lore:");
-                    out.println("        - '&fClick to buy'");
-                    out.println("        - '&fthis currency.'");
-                    out.println("        - ''");
-                    out.println("        - '&fBuy Value (Fees Applied): &6%value% coins'");
-                    out.println("    sell-currency:");
-                    out.println("      slot: 16");
-                    out.println("      item: '343'");
-                    out.println("      name: '&cSell %currency-name%'");
-                    out.println("      lore:");
-                    out.println("        - '&fClick to sell'");
-                    out.println("        - '&fthis currency.'");
-                    out.println("        - ''");
-                    out.println("        - '&fSell Value: &6%value% coins'");
-                    out.println("    close:");
-                    out.println("      item: '166'");
-                    out.println("      slot: 22");
-                    out.println("      name: '&cClose'");
-                    out.println("      lore:");
-                    out.println("        - '&fClick to close'");
-                    out.println("        - '&fand cancel the exchange.'");
-                }
-            }
-            out.flush();
-            out.close();
-            in.close();
-
-            inFile.delete();
-            outFile.renameTo(inFile);
-
-            //------------------------------------------------
-
-            inFile = new File(RoyaleEconomy.plugin.getDataFolder(), "shops.yml");
-
-            // input
-            fis = new FileInputStream(inFile);
-            in = new BufferedReader(new InputStreamReader(fis, Charsets.UTF_8));
-
-            // output
-            fos = new FileOutputStream(outFile);
-            out = new PrintWriter(new OutputStreamWriter(fos, Charsets.UTF_8));
-
-            keys = RoyaleEconomy.shopsCfg.getKeys(true);
-
-
-            while ((thisLine = in.readLine()) != null) {
-                if(thisLine.startsWith("lore-sell-addition:") && !keys.contains("lore-cannot-buy-addition")){
-                    out.println("#You can also use %sell-amount% inside here");
-                    out.println("lore-cannot-buy-addition:");
-                    out.println("  - ''");
-                    out.println("  - '&cThis item can''t'");
-                    out.println("  - '&cbe bought!'");
-                    out.println(" ");
-                }
-                out.println(thisLine);
-            }
-
-            if (!keys.contains("no-buy-permission-message")) {
-                out.println("no-buy-permission-message: '&cYou don''t have permission to buy this item!'");
-            }
-            out.flush();
-            out.close();
-            in.close();
-
-            inFile.delete();
-            outFile.renameTo(inFile);
-
-            //------------------------------------------------
 
             inFile = new File(RoyaleEconomy.plugin.getDataFolder(), "commands.yml");
 
@@ -298,8 +193,6 @@ public class UpdateFiles {
             inFile.delete();
             outFile.renameTo(inFile);
 
-            RoyaleEconomy.multiCurrencyCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "multiCurrency.yml"));
-            RoyaleEconomy.shopsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "shops.yml"));
             RoyaleEconomy.commandsCfg = Utf8YamlConfiguration.loadConfiguration(new File(RoyaleEconomy.plugin.getDataFolder(), "commands.yml"));
 
         }catch(Exception x){

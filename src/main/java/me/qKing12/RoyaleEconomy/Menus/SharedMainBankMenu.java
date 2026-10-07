@@ -1,6 +1,5 @@
 package me.qKing12.RoyaleEconomy.Menus;
 
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
 import me.qKing12.RoyaleEconomy.DataManager.StaticValues;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
@@ -16,8 +15,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.*;
 
@@ -131,12 +128,6 @@ public class SharedMainBankMenu  {
                     inventory.setItem(slot, RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.menusCfg.getString("shared-menus.main-bank-menu.bank-upgrades.item-id"), utilsAPI.chatApiOnly(p, RoyaleEconomy.menusCfg.getString("shared-menus.main-bank-menu.bank-upgrades.name")), lore));
             }
 
-            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("shared-bank-main-menu");
-            if(customItems!=null) {
-                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
-                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
-            }
-
             RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
@@ -159,10 +150,6 @@ public class SharedMainBankMenu  {
                 e.setCancelled(true);
                 if(!e.getClickedInventory().equals(e.getWhoClicked().getInventory())){
                     Player p = (Player) e.getWhoClicked();
-
-                    if(customItemsHandler.tryClick("shared-bank-main-menu", e.getSlot(), p)){
-                        return;
-                    }
 
                     if(staticValues.sharedcloseItemSlot!=null && staticValues.sharedcloseItemSlot.contains(e.getSlot())){
                         p.closeInventory();

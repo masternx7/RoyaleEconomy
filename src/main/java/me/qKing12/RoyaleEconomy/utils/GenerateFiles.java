@@ -38,18 +38,9 @@ public class GenerateFiles {
         files.add("bankUpgrades.yml");
         files.add("coinBagsAndTalismans.yml");
         files.add("commands.yml");
-        files.add("killCoinsAndPurseDeath.yml");
         files.add("menus.yml");
-        files.add("shops.yml");
         files.add("permissions.yml");
         files.add("sounds.yml");
-        files.add("boosters.yml");
-        files.add("blackMarket.yml");
-        files.add("gambling.yml");
-        files.add("timeRewards.yml");
-        files.add("multiCurrency.yml");
-        files.add("multiCurrencyShops.yml");
-        files.add("customMenuItems.yml");
 
         for(String file : files) {
             File toCreate = new File(RoyaleEconomy.plugin.getDataFolder(), file);

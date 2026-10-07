@@ -1,7 +1,5 @@
 package me.qKing12.RoyaleEconomy.Economy;
 
-import com.Zrips.CMI.CMI;
-import com.Zrips.CMI.Containers.CMIUser;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
@@ -16,7 +14,6 @@ import static me.qKing12.RoyaleEconomy.Commands.BalanceTopCommand.hiddenPlayers;
 
 public class BalanceTopNoEconomy {
     public Essentials essentials;
-    public CMI cmi;
 
     protected static class Pair implements Comparable<Pair> {
 
@@ -62,8 +59,6 @@ public class BalanceTopNoEconomy {
     public BalanceTopNoEconomy() {
         if (Bukkit.getPluginManager().isPluginEnabled("Essentials")) {
             essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        } else if (Bukkit.getPluginManager().isPluginEnabled("CMI")) {
-            cmi = CMI.getInstance();
         }
     }
 
@@ -114,25 +109,6 @@ public class BalanceTopNoEconomy {
                         RoyaleEconomy.plugin.getLogger().warning("Error while trying to load balancetop, there is a problem with your Essentials. Please contact me on discord/polymart.org!");
                         RoyaleEconomy.plugin.getLogger().warning("This error will not be shown again until the next restart, please ignore it if balancetop doesn't have issues.");
                     }
-                }
-            } else if (cmi != null) {
-                try {
-                    int maximum = RoyaleEconomy.staticValues.balanceTopMaximumPages * RoyaleEconomy.staticValues.balanceTopDisplayPerPage;
-                    for (Map.Entry<Double, UUID> entry : cmi.getEconomyManager().getBalTopMap().entrySet()) {
-                        CMIUser user = CMIUser.getUser(entry.getValue());
-                        if (!hiddenPlayers.contains(user.getName())) {
-                            toReturn.add(RoyaleEconomy.messageHelper.numberFormat(entry.getKey()));
-                            toReturn.add(user.getName());
-                        }
-                        maximum--;
-                        if (maximum == 0)
-                            break;
-                    }
-                    return toReturn;
-                } catch (Exception | NoSuchMethodError x) {
-                    firstNotice = true;
-                    RoyaleEconomy.plugin.getLogger().warning("Error while trying to load balancetop, there is a problem with your CMI. Please contact me on discord/polymart.org!");
-                    RoyaleEconomy.plugin.getLogger().warning("This error will not be shown again until the next restart, please ignore it if balancetop doesn't have issues.");
                 }
             }
         }

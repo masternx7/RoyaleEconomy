@@ -6,14 +6,8 @@ import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.inventory.ItemStack;
 
 public class PlayerMessageHandler {
     private interface actionBarSend{
@@ -21,19 +15,6 @@ public class PlayerMessageHandler {
     }
 
     private static actionBarSend actionBarHandler;
-
-    private class actionBar18 implements actionBarSend{
-        @Override
-        public void sendActionBar(Player p, String message) {
-            try {
-                IChatBaseComponent iChatBaseComponent = ChatSerializer.a("{\"text\": \"" + message + "\"}");
-                PacketPlayOutChat packetPlayOutChat = new PacketPlayOutChat(iChatBaseComponent, (byte) 2);
-                ((CraftPlayer) p).getHandle().playerConnection.sendPacket(packetPlayOutChat);
-            }catch(Exception x){
-                p.sendMessage("ActionBars don't work below 1.8.8");
-            }
-        }
-    }
 
     private class actionBar implements actionBarSend{
         @Override
@@ -43,10 +24,7 @@ public class PlayerMessageHandler {
     }
 
     public PlayerMessageHandler(){
-        if(Bukkit.getVersion().contains("1.8") && !Bukkit.getVersion().contains("1.21"))
-            actionBarHandler=new actionBar18();
-        else
-            actionBarHandler=new actionBar();
+        actionBarHandler=new actionBar();
     }
 
     public static void messageSend(Player p, String message){

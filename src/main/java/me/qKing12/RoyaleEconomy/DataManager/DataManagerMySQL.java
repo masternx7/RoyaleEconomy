@@ -1,7 +1,5 @@
 package me.qKing12.RoyaleEconomy.DataManager;
 
-import com.Zrips.CMI.CMI;
-import com.Zrips.CMI.Containers.CMIUser;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.tcoded.folialib.wrapper.task.WrappedTask;
@@ -12,8 +10,6 @@ import me.qKing12.RoyaleEconomy.DataManager.Cache.BungeeMessagingCacheMySQL;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.MySQLBankCache;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.PlayerMoneyCacheMySQL;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.redis.RedisHandler;
-import me.qKing12.RoyaleEconomy.DataManager.SellLimitGlobal.ISellLimitGlobal;
-import me.qKing12.RoyaleEconomy.DataManager.SellLimitGlobal.SellLimitGlobalMySQL;
 import me.qKing12.RoyaleEconomy.DataManager.SharedBank.SharedBank;
 import me.qKing12.RoyaleEconomy.DataManager.SharedBank.SharedBankMySQL;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
@@ -47,13 +43,6 @@ public class DataManagerMySQL implements DataManager {
     public static String database;
     public static MySQLBankCache bankCache;
     private SharedBank sharedBank;
-
-    private ISellLimitGlobal sellLimitGlobal = new SellLimitGlobalMySQL();
-
-    @Override
-    public ISellLimitGlobal getSellLimit() {
-        return sellLimitGlobal;
-    }
 
     @Override
     public SharedBank getSharedBankManager() {
@@ -921,49 +910,8 @@ public class DataManagerMySQL implements DataManager {
     }
 
     public void importCMI() {
-        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
-            try (
-                    Connection Database = HikariCPDataSource.getConnection();
-                    PreparedStatement u = Database.prepareStatement(
-                            "INSERT IGNORE INTO " + database + ".PlayerPurse VALUES (?, ? ,0, '')"
-                    );
-
-                    PreparedStatement u1 = Database.prepareStatement(
-                            "UPDATE " + database + ".PlayerPurse SET coins = ? WHERE id = ?"
-                    );
-
-                    PreparedStatement u2 = Database.prepareStatement(
-                            "INSERT IGNORE INTO " + database + ".PersonalBank VALUES (?, " + RoyaleEconomy.staticValues.defaultBankCoins + " ," + 0 + ", '')"
-                    );
-            ) {
-                Database.setAutoCommit(false);
-                for (CMIUser player : CMI.getInstance().getPlayerManager().getAllUsers().values()) {
-                    String uuid = player.getUniqueId().toString();
-                    String name = player.getName();
-                    double coins = player.getBalance();
-
-                    u.setString(1, uuid);
-                    u.setString(2, name);
-                    u1.setDouble(1, coins);
-                    u1.setString(2, uuid);
-                    u2.setString(1, uuid);
-                    u.addBatch();
-                    u1.addBatch();
-                    u2.addBatch();
-                }
-
-                u.executeBatch();
-                u1.executeBatch();
-                u2.executeBatch();
-                Database.commit();
-                Database.setAutoCommit(true);
-                playerMoneyCache.reloadBalances();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        RoyaleEconomy.plugin.getLogger().warning("CMI import is not included in this build.");
     }
-
     public void exportEconomy() {
         RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
             try (

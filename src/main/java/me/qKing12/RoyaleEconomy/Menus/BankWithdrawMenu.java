@@ -3,9 +3,8 @@ package me.qKing12.RoyaleEconomy.Menus;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.qKing12.RoyaleEconomy.API.Events.BankWithdrawEvent;
 import me.qKing12.RoyaleEconomy.API.Events.PreBankWithdrawEvent;
-import me.qKing12.RoyaleEconomy.Commands.MoneyBagCommand;
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
+import me.qKing12.RoyaleEconomy.utils.MoneyBag;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
 import me.qKing12.RoyaleEconomy.utils.Utils;
 import org.bukkit.Bukkit;
@@ -55,7 +54,7 @@ public class BankWithdrawMenu {
             RoyaleEconomy.dataManager.addMoneyToFile(p.getUniqueId().toString(), amount);
             return;
         }
-        p.getInventory().addItem(MoneyBagCommand.generateMoneyBag(amount));
+        p.getInventory().addItem(MoneyBag.generateMoneyBag(amount));
         RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.moneybag.output").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
     }
 
@@ -143,12 +142,6 @@ public class BankWithdrawMenu {
                 inventory.setItem(slot, nbt.getItem());
             }
 
-            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("personal-bank-withdraw-menu");
-            if(customItems!=null) {
-                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
-                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
-            }
-
             RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
@@ -176,11 +169,6 @@ public class BankWithdrawMenu {
             if(clickCooldown.compareAndSet(false, true)){
                 if(!e.getClickedInventory().equals(e.getWhoClicked().getInventory())) {
                     Player p = (Player) e.getWhoClicked();
-
-                    if(customItemsHandler.tryClick("personal-bank-withdraw-menu", e.getSlot(), p)){
-                        clickCooldown.compareAndSet(true,false);
-                        return;
-                    }
 
                     if (staticValues.goBackItemSlotWithdraw != null && staticValues.goBackItemSlotWithdraw.contains(e.getSlot())) {
                         RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> new MainBankMenu(p));

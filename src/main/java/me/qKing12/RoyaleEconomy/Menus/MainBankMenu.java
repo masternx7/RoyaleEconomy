@@ -1,6 +1,5 @@
 package me.qKing12.RoyaleEconomy.Menus;
 
-import me.qKing12.RoyaleEconomy.CustomMenuItems.CustomItem;
 import me.qKing12.RoyaleEconomy.DataManager.StaticValues;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.Utils;
@@ -16,8 +15,6 @@ import org.bukkit.inventory.Inventory;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.*;
 
@@ -106,12 +103,6 @@ public class MainBankMenu  {
                     inventory.setItem(slot, RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.menusCfg.getString("menus.main-bank-menu.bank-upgrades.item-id"), utilsAPI.chatApiOnly(p, RoyaleEconomy.menusCfg.getString("menus.main-bank-menu.bank-upgrades.name")), lore));
             }
 
-            HashMap<Integer, CustomItem> customItems = customItemsHandler.getItems("personal-bank-main-menu");
-            if(customItems!=null) {
-                for (Map.Entry<Integer, CustomItem> item : customItems.entrySet())
-                    inventory.setItem(item.getKey(), item.getValue().getItem(p));
-            }
-
             RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
@@ -132,10 +123,6 @@ public class MainBankMenu  {
             //if(inventory.getViewers().isEmpty()) RoyaleEconomy.plugin.getLogger().warning("A closed listener is still active.");
                 if(!e.getClickedInventory().equals(e.getWhoClicked().getInventory())){
                     Player p = (Player) e.getWhoClicked();
-
-                    if(customItemsHandler.tryClick("personal-bank-main-menu", e.getSlot(), p)){
-                        return;
-                    }
 
                     if(RoyaleEconomy.staticValues.closeItemSlot.contains(e.getSlot())){
                         p.closeInventory();

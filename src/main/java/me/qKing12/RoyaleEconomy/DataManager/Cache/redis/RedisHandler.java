@@ -4,8 +4,6 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import me.qKing12.RoyaleEconomy.DataManager.Cache.PlayerMoneyCacheMySQL;
 import me.qKing12.RoyaleEconomy.DataManager.DataManagerMySQL;
-import me.qKing12.RoyaleEconomy.MultiCurrency.internal.Currency;
-import me.qKing12.RoyaleEconomy.MultiCurrency.internal.MultiCurrencyHandler;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.utils.PlayerMessageHandler;
 import me.qKing12.RoyaleEconomy.utils.Utils;
@@ -114,14 +112,6 @@ public class RedisHandler {
 
                         Utils.playSound(player, "commands.pay.to-player");
                         PlayerMessageHandler.messageSend(player, utilsAPI.chat(player, in.readUTF()));
-                    }
-                    else if(action.equalsIgnoreCase("currencyUpdate")){
-                        String uuid = in.readUTF();
-                        String currencyId = in.readUTF();
-                        Currency currency = MultiCurrencyHandler.findCurrencyById(currencyId);
-                        if(currency!=null){
-                            currency.removeAmountCache(uuid, false);
-                        }
                     }
                 }
                 else if(subChannel.equalsIgnoreCase("RoyaleEconomyBankInterest")){

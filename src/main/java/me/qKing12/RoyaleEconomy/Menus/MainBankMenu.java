@@ -103,7 +103,9 @@ public class MainBankMenu  {
                     inventory.setItem(slot, RoyaleEconomy.itemConstructor.getItem(RoyaleEconomy.menusCfg.getString("menus.main-bank-menu.bank-upgrades.item-id"), utilsAPI.chatApiOnly(p, RoyaleEconomy.menusCfg.getString("menus.main-bank-menu.bank-upgrades.name")), lore));
             }
 
-            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
+            Utils.runOnPlayer(p, () -> {
+                if (!p.isOnline() || inventory == null)
+                    return;
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
             });

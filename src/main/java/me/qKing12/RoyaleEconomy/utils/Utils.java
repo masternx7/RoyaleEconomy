@@ -62,36 +62,45 @@ public class Utils {
         return true;
     }
 
+    public static void runOnPlayer(Player player, Runnable action) {
+        if (player == null || action == null)
+            return;
+        if (RoyaleEconomy.plugin.getSchedulerLib().getScheduler().isOwnedByCurrentRegion(player)) {
+            action.run();
+            return;
+        }
+        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAtEntity(player, task -> action.run());
+    }
+
     public static void playSound(Player p, String soundCfg) {
         try {
             String sound = RoyaleEconomy.soundsCfg.getString(soundCfg);
             if (sound == null || sound.equalsIgnoreCase("none"))
                 return;
-            if (sound.contains(":")) {
-                String[] soundArgs = sound.split(":");
-                if (soundArgs.length == 2)
-                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> p.playSound(p.getLocation(), Sound.valueOf(soundArgs[0]), 2, Float.valueOf(soundArgs[1])));
-                else
-                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> p.playSound(p.getLocation(), Sound.valueOf(soundArgs[0]), Float.valueOf(soundArgs[2]), Float.valueOf(soundArgs[1])));
-            } else
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> p.playSound(p.getLocation(), Sound.valueOf(sound), 2, 2));
+            runOnPlayer(p, () -> playSoundNow(p, sound));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void playSoundDirectly(Player p, String sound) {
+        if (sound == null || sound.equalsIgnoreCase("none"))
+            return;
+        runOnPlayer(p, () -> playSoundNow(p, sound));
+    }
+
+    private static void playSoundNow(Player p, String sound) {
         try {
-            if (sound == null || sound.equalsIgnoreCase("none"))
+            if (!p.isOnline())
                 return;
             if (sound.contains(":")) {
                 String[] soundArgs = sound.split(":");
                 if (soundArgs.length == 2)
-                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> p.playSound(p.getLocation(), Sound.valueOf(soundArgs[0]), 2, Float.valueOf(soundArgs[1])));
+                    p.playSound(p.getLocation(), Sound.valueOf(soundArgs[0]), 2, Float.valueOf(soundArgs[1]));
                 else
-                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> p.playSound(p.getLocation(), Sound.valueOf(soundArgs[0]), Float.valueOf(soundArgs[2]), Float.valueOf(soundArgs[1])));
+                    p.playSound(p.getLocation(), Sound.valueOf(soundArgs[0]), Float.valueOf(soundArgs[2]), Float.valueOf(soundArgs[1]));
             } else
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> p.playSound(p.getLocation(), Sound.valueOf(sound), 2, 2));
+                p.playSound(p.getLocation(), Sound.valueOf(sound), 2, 2);
         } catch (Exception e) {
             e.printStackTrace();
         }

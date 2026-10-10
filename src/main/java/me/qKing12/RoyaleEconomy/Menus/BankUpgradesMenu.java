@@ -95,7 +95,9 @@ public class BankUpgradesMenu  {
                 inventory.setItem(slot, toDisplay);
             }
 
-            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
+            Utils.runOnPlayer(p, () -> {
+                if (!p.isOnline() || inventory == null)
+                    return;
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
             });

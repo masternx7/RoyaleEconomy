@@ -37,7 +37,7 @@ public class SharedBankWithdrawMenu {
             if (plugin.bankLogger != null)
                 plugin.bankLogger.getLogger().info("[WITHDRAW SHARED BAG] " + p.getName() + " (" + p.getUniqueId() + ")" + " withdrew " + amount + " coins.");
             if (amount < coinBagsAndTalismansCfg.getDouble("money-bags.minimum-amount")) {
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> {
+                Utils.runOnPlayer(p, () -> {
                     PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, coinBagsAndTalismansCfg.getString("money-bags.minimum-message")));
                     PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("menus.withdraw-coins-menu.withdraw-as-bag.withdraw-as-purse")));
                 });
@@ -45,15 +45,19 @@ public class SharedBankWithdrawMenu {
                 return;
             }
             if (amount > coinBagsAndTalismansCfg.getDouble("money-bags.maximum-amount")) {
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> {
+                Utils.runOnPlayer(p, () -> {
                     PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, coinBagsAndTalismansCfg.getString("money-bags.maximum-message")));
                     PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("menus.withdraw-coins-menu.withdraw-as-bag.withdraw-as-purse")));
                 });
                 RoyaleEconomy.dataManager.addMoneyToFile(p.getUniqueId().toString(), amount);
                 return;
             }
-            p.getInventory().addItem(MoneyBag.generateMoneyBag(amount));
-            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.moneybag.output").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
+            ItemStack bag = MoneyBag.generateMoneyBag(amount);
+            Utils.runOnPlayer(p, () -> {
+                if (p.isOnline())
+                    p.getInventory().addItem(bag);
+            });
+            Utils.runOnPlayer(p, () -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.moneybag.output").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
         } else
             PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(amount))));
     }
@@ -66,7 +70,7 @@ public class SharedBankWithdrawMenu {
             bankID = dataManager.getSharedBankManager().getSharedBankId(p.getUniqueId().toString());
 
             if (bankID.equals("")) {
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick(task2 -> p.closeInventory());
+                Utils.runOnPlayer(p, () -> { if (p.isOnline()) p.closeInventory(); });
                 return;
             }
 
@@ -149,7 +153,9 @@ public class SharedBankWithdrawMenu {
                 inventory.setItem(slot, nbt.getItem());
             }
 
-            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
+            Utils.runOnPlayer(p, () -> {
+                if (!p.isOnline() || inventory == null)
+                    return;
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
             });

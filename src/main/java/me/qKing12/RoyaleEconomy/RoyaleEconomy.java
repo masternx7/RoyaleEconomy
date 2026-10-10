@@ -172,7 +172,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                                     if(plugin.bankLogger != null)
                                                         plugin.bankLogger.getLogger().info("[DEPOSIT SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
                                                     final double toDepositFinal = toDeposit;
-                                                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
+                                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
                                                     RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", toDeposit);
                                                 }
                                             }
@@ -192,7 +192,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                                     if(plugin.bankLogger != null)
                                                         plugin.bankLogger.getLogger().info("[DEPOSIT VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
                                                     final double toDepositFinal = toDeposit;
-                                                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
+                                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
                                                     RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&a+", toDeposit);
                                                 }
                                             }
@@ -257,7 +257,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                                     if(plugin.bankLogger != null)
                                                         plugin.bankLogger.getLogger().info("[WITHDRAW SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
                                                 }
-                                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
+                                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
                                                 RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&c-", toWithdraw);
                                             }
                                             else {
@@ -274,7 +274,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                                     if(plugin.bankLogger != null)
                                                         plugin.bankLogger.getLogger().info("[WITHDRAW VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
                                                 }
-                                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
+                                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
                                                 RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&c-", toWithdraw);
                                             }
                                             Utils.playSound(p, "menus.bank-withdraw");
@@ -346,7 +346,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                             if(plugin.bankLogger != null)
                                                 plugin.bankLogger.getLogger().info("[DEPOSIT SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
                                             final double toDepositFinal = toDeposit;
-                                            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
+                                            Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
                                             RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", toDeposit);
                                         }
                                     }
@@ -359,7 +359,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                             if(plugin.bankLogger != null)
                                                 plugin.bankLogger.getLogger().info("[DEPOSIT VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
                                             final double toDepositFinal = toDeposit;
-                                            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
+                                            Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
                                             RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&a+", toDeposit);
                                         }
                                     }
@@ -407,7 +407,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                             if(plugin.bankLogger != null)
                                                 plugin.bankLogger.getLogger().info("[WITHDRAW SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
                                         }
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
+                                        Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
                                         RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&c-", toWithdraw);
                                     }
                                     else {
@@ -419,7 +419,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                             if(plugin.bankLogger != null)
                                                 plugin.bankLogger.getLogger().info("[WITHDRAW VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
                                         }
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
+                                        Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
                                         RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&c-", toWithdraw);
                                     }
                                     Utils.playSound(p, "menus.bank-withdraw");
@@ -459,7 +459,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                     if(plugin.bankLogger != null)
                                         plugin.bankLogger.getLogger().info("[DEPOSIT SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
                                     final double toDepositFinal = toDeposit;
-                                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
+                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
                                     RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", toDeposit);
                                 }
                             }
@@ -472,7 +472,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                     if(plugin.bankLogger != null)
                                         plugin.bankLogger.getLogger().info("[DEPOSIT VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
                                     final double toDepositFinal = toDeposit;
-                                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
+                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
                                     RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&a+", toDeposit);
                                 }
                             }
@@ -510,7 +510,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                         PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
                                     }
                                 }
-                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
+                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
                                 RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&c-", toWithdraw);
                             }
                             else {
@@ -522,7 +522,7 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
                                     if(plugin.bankLogger != null)
                                         plugin.bankLogger.getLogger().info("[WITHDRAW VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
                                 }
-                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
+                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
                                 RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&c-", toWithdraw);
                             }
                             Utils.playSound(p, "menus.bank-withdraw");

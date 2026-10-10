@@ -81,15 +81,15 @@ public class BankCommand implements TabExecutor {
                             if (args.length == 1) {
                                 Utils.playSound(p, "commands.bank.bank-balance");
                                 Double coins = RoyaleEconomy.dataManager.getBankMoneyFromFile(p.getUniqueId().toString());
-                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> PlayerMessageHandler.messageSend(p, RoyaleEconomy.messageHelper.getBankBalanceMessage(coins)));
+                                Utils.runOnPlayer(p, () -> PlayerMessageHandler.messageSend(p, RoyaleEconomy.messageHelper.getBankBalanceMessage(coins)));
                             } else {
                                 if(PermissionChecker.checkPermission("commands.bank.bank-balance-other", p)) {
                                     String uuid = RoyaleEconomy.dataManager.getUUIDfromName(args[1]);
                                     if (uuid == null)
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.bank.player-not-found"))));
+                                        Utils.runOnPlayer(p, () -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.bank.player-not-found"))));
                                     else {
                                         Utils.playSound(p, "commands.bank.bank-balance-other");
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> PlayerMessageHandler.messageSend(p, RoyaleEconomy.messageHelper.getBankBalanceMessage(args[1], RoyaleEconomy.dataManager.getBankMoneyFromFile(uuid))));
+                                        Utils.runOnPlayer(p, () -> PlayerMessageHandler.messageSend(p, RoyaleEconomy.messageHelper.getBankBalanceMessage(args[1], RoyaleEconomy.dataManager.getBankMoneyFromFile(uuid))));
                                     }
                                 }
                             }

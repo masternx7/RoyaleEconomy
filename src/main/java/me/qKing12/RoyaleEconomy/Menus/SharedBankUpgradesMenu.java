@@ -44,7 +44,7 @@ public class SharedBankUpgradesMenu {
             bankID = RoyaleEconomy.dataManager.getSharedBankManager().getSharedBankId(p.getUniqueId().toString());
 
             if (bankID.equals("")) {
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick(task1 -> p.closeInventory());
+                Utils.runOnPlayer(p, () -> { if (p.isOnline()) p.closeInventory(); });
                 return;
             }
 
@@ -102,7 +102,9 @@ public class SharedBankUpgradesMenu {
                 inventory.setItem(slot, toDisplay);
             }
 
-            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
+            Utils.runOnPlayer(p, () -> {
+                if (!p.isOnline() || inventory == null)
+                    return;
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
             });

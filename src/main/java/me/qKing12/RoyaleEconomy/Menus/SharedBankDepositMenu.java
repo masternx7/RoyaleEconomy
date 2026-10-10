@@ -37,7 +37,7 @@ public class SharedBankDepositMenu {
 
             bankID = dataManager.getSharedBankManager().getSharedBankId(p.getUniqueId().toString());
             if (bankID.equals("")) {
-                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> p.closeInventory());
+                Utils.runOnPlayer(p, () -> { if (p.isOnline()) p.closeInventory(); });
                 return;
             }
 
@@ -101,7 +101,9 @@ public class SharedBankDepositMenu {
                 inventory.setItem(slot, nbt.getItem());
             }
 
-            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task2) -> {
+            Utils.runOnPlayer(p, () -> {
+                if (!p.isOnline() || inventory == null)
+                    return;
                 p.openInventory(inventory);
                 Bukkit.getPluginManager().registerEvents(new ClickListener(), RoyaleEconomy.plugin);
             });
@@ -161,8 +163,8 @@ public class SharedBankDepositMenu {
                                     plugin.bankLogger.getLogger().info("[DEPOSIT SHARED] " + p.getName() + " (" + p.getUniqueId() + ")" + " deposited " + amount + " coins.");
                                 RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", amount);
                                 Utils.playSound(p, "menus.bank-deposit");
-                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.deposit-message").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
-                                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, amount)));
+                                Utils.runOnPlayer(p, () -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("shared-menus.deposit-coins-menu.deposit-message").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
+                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, amount)));
                             }
                             //});
                             if (bankBalance + amount == maximum_coins)

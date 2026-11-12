@@ -534,13 +534,17 @@ public class DataManagerSQL implements DataManager {
     }
     public void setBankMoney(String player, double amount) {
         if (((PlayerMoneyCacheSQL) playerMoneyCache).setBalanceBank(player, amount)) {
+            ((PlayerMoneyCacheSQL) playerMoneyCache).savePlayerBalances(player);
             return;
         }
         //RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
         try (
                 Connection Database = HikariCPDataSource.getConnection();
+                PreparedStatement insert = Database.prepareStatement("INSERT OR IGNORE INTO PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, 0, 0, '')");
                 PreparedStatement stmt = Database.prepareStatement("UPDATE PersonalBank SET coins = ? WHERE id = ?");
         ) {
+            insert.setString(1, player);
+            insert.executeUpdate();
             stmt.setDouble(1, amount);
             stmt.setString(2, player);
             stmt.executeUpdate();
@@ -556,14 +560,20 @@ public class DataManagerSQL implements DataManager {
     public void addBankMoneyToFile(String player, double amount2) {
         double amount = Math.floor(amount2 * 100) / 100;
         if (((PlayerMoneyCacheSQL) playerMoneyCache).addBalanceBank(player, amount)) {
+            //Flush right away so the deposit cannot be lost if the server stops
+            //or the player relogs before the periodic save task runs.
+            ((PlayerMoneyCacheSQL) playerMoneyCache).savePlayerBalances(player);
             //RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runNextTick((task) -> Bukkit.getPluginManager().callEvent(new CoinsAddToPurseEvent(player, amount)));
             return;
         }
         //RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
         try (
                 Connection Database = HikariCPDataSource.getConnection();
+                PreparedStatement insert = Database.prepareStatement("INSERT OR IGNORE INTO PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, 0, 0, '')");
                 PreparedStatement stmt = Database.prepareStatement("UPDATE PersonalBank SET coins = coins +? WHERE id = ?");
         ) {
+            insert.setString(1, player);
+            insert.executeUpdate();
             stmt.setDouble(1, amount);
             stmt.setString(2, player);
             stmt.executeUpdate();
@@ -583,6 +593,7 @@ public class DataManagerSQL implements DataManager {
         if (onlineRemove == 0)
             return;
         else if (onlineRemove == 1) {
+            ((PlayerMoneyCacheSQL) playerMoneyCache).savePlayerBalances(player);
             return;
         }
         try (
@@ -876,6 +887,7 @@ public class DataManagerSQL implements DataManager {
                  PreparedStatement stmt1 = Database.prepareStatement("UPDATE PlayerPurse SET username = ? WHERE id = ?");
                  PreparedStatement stmt2 = Database.prepareStatement("INSERT INTO PlayerPurse VALUES (?, ? ,?, '')");
                  PreparedStatement stmt3 = Database.prepareStatement("INSERT INTO PersonalBank VALUES (?, ? , 0, '')");
+                 PreparedStatement stmt4 = Database.prepareStatement("INSERT OR IGNORE INTO PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, ?, 0, '')");
             ) {
                 if (r.next()) {
                     String name = r.getString("username");
@@ -896,6 +908,12 @@ public class DataManagerSQL implements DataManager {
                         stmt3.executeUpdate();
                     }
                 }
+
+                //Make sure an existing player always has a bank row. Without it
+                //the deposit update affects 0 rows and the money vanishes.
+                stmt4.setString(1, player.getUniqueId().toString());
+                stmt4.setDouble(2, RoyaleEconomy.staticValues.defaultBankCoins);
+                stmt4.executeUpdate();
             } catch (Exception e) {
                 if (e.getMessage() != null && e.getMessage().startsWith("[SQLITE_BUSY]")) {
                     RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> updateUsername(player), 7);

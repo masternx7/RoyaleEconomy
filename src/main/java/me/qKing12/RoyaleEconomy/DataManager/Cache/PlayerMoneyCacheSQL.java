@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -69,17 +70,84 @@ public class PlayerMoneyCacheSQL implements Listener, PlayerMoneyCache {
         try(
                 Connection Database = HikariCPDataSource.getConnection();
                 PreparedStatement updatePurse = Database.prepareStatement("UPDATE PlayerPurse SET coins = ? WHERE id = ?");
+                PreparedStatement updateBank = Database.prepareStatement("UPDATE PersonalBank SET coins = ? WHERE id = ?");
         ){
             Iterator<Map.Entry<Player, RECPlayer>> iterator = onlinePlayers.entrySet().iterator();
             while(iterator.hasNext()) {
                 Map.Entry<Player, RECPlayer> player=iterator.next();
-                    updatePurse.setDouble(1, player.getValue().newAmount);
-                    updatePurse.setString(2, player.getKey().getUniqueId().toString());
-                    updatePurse.addBatch();
+                    if(!RoyaleEconomy.noEconomy) {
+                        updatePurse.setDouble(1, player.getValue().newAmount);
+                        updatePurse.setString(2, player.getKey().getUniqueId().toString());
+                        updatePurse.addBatch();
+                    }
+                    updateBank.setDouble(1, player.getValue().bankAmount);
+                    updateBank.setString(2, player.getKey().getUniqueId().toString());
+                    updateBank.addBatch();
             }
-            updatePurse.executeBatch();
+            if(!RoyaleEconomy.noEconomy)
+                updatePurse.executeBatch();
+            updateBank.executeBatch();
         }catch (Exception x){
             x.printStackTrace();
+        }
+    }
+
+    /**
+     * Saves the cached balances of a player immediately instead of waiting
+     * for the periodic task. This prevents a deposit from being lost when the
+     * player relogs or the server stops before the next cache flush.
+     */
+    public void savePlayerBalances(Player player){
+        if(player == null)
+            return;
+
+        RECPlayer recPlayer = onlinePlayers.get(player);
+        if(recPlayer == null)
+            recPlayer = getRecPlayer(player);
+        if(recPlayer == null)
+            return;
+
+        savePlayerBalances(player.getUniqueId().toString(), recPlayer.newAmount, recPlayer.bankAmount);
+    }
+
+    public void savePlayerBalances(String player){
+        Player p = null;
+        try {
+            p = player.length() > 16 ? Bukkit.getPlayer(UUID.fromString(player)) : Bukkit.getPlayerExact(player);
+        } catch (Exception ignored) {
+        }
+        if(p == null)
+            return;
+        savePlayerBalances(p);
+    }
+
+    private void savePlayerBalances(String playerUUID, double purseAmount, double bankAmount){
+        try(
+                Connection Database = HikariCPDataSource.getConnection();
+                PreparedStatement insertBank = Database.prepareStatement(
+                        "INSERT OR IGNORE INTO PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, 0, 0, '')");
+                PreparedStatement updatePurse = Database.prepareStatement("UPDATE PlayerPurse SET coins = ? WHERE id = ?");
+                PreparedStatement updateBank = Database.prepareStatement("UPDATE PersonalBank SET coins = ? WHERE id = ?");
+        ){
+            insertBank.setString(1, playerUUID);
+            insertBank.executeUpdate();
+
+            if(!RoyaleEconomy.noEconomy) {
+                updatePurse.setDouble(1, purseAmount);
+                updatePurse.setString(2, playerUUID);
+                updatePurse.executeUpdate();
+            }
+
+            updateBank.setDouble(1, bankAmount);
+            updateBank.setString(2, playerUUID);
+            updateBank.executeUpdate();
+        }catch (Exception x){
+            if(x.getMessage()!=null && x.getMessage().startsWith("[SQLITE_BUSY]")){
+                RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(
+                        () -> savePlayerBalances(playerUUID, purseAmount, bankAmount), 7);
+            }
+            else
+                x.printStackTrace();
         }
     }
 
@@ -143,6 +211,12 @@ public class PlayerMoneyCacheSQL implements Listener, PlayerMoneyCache {
         if(onlinePlayers.containsKey(e.getPlayer()))
             return;
         onlinePlayers.put(e.getPlayer(), new RECPlayer(e.getPlayer()));
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e){
+        savePlayerBalances(e.getPlayer());
+        onlinePlayers.remove(e.getPlayer());
     }
 
     /*@EventHandler

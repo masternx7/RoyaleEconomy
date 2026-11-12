@@ -6,7 +6,11 @@ api-version: "1.13"
 main: me.qKing12.RoyaleEconomy.RoyaleEconomy
 folia-supported: true
 load: STARTUP
-softdepend: [ProtocolLib, PluginQuery]
+softdepend: [PluginQuery]
+#Loaded by Paper before the plugin is enabled.
+libraries:
+  - com.mysql:mysql-connector-j:8.4.0
+  - redis.clients:jedis:4.3.0
 loadbefore: [Vault]
 
 commands:

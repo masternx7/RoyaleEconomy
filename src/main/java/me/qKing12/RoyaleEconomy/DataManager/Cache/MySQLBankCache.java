@@ -272,7 +272,7 @@ public class MySQLBankCache implements Listener {
 
         PlayerMoneyCacheMySQL.RECPlayer recPlayer = PlayerMoneyCacheMySQL.onlinePlayers.getOrDefault(player, null);
         if (recPlayer == null)
-            return false;
+            return true;
 
         return recPlayer.previousAmount != -1;
     }

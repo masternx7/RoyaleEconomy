@@ -35,15 +35,13 @@ public class BankWithdrawMenu {
     public static ArrayList<String> withdrawAsBagPlayers = new ArrayList<>();
 
     public static void tryBagCreator(Double amount, Player p){
-        RoyaleEconomy.dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), amount);
-        if(plugin.bankLogger != null)
-            plugin.bankLogger.getLogger().info("[WITHDRAW BAG] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + amount + " coins.");
         if (amount < coinBagsAndTalismansCfg.getDouble("money-bags.minimum-amount")) {
             Utils.runOnPlayer(p, () -> {
                         PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, coinBagsAndTalismansCfg.getString("money-bags.minimum-message")));
                         PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("menus.withdraw-coins-menu.withdraw-as-bag.withdraw-as-purse")));
                     });
             RoyaleEconomy.dataManager.addMoneyToFile(p.getUniqueId().toString(), amount);
+            RoyaleEconomy.dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), amount);
             return;
         }
         if (amount > coinBagsAndTalismansCfg.getDouble("money-bags.maximum-amount")) {
@@ -52,8 +50,12 @@ public class BankWithdrawMenu {
                         PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.menusCfg.getString("menus.withdraw-coins-menu.withdraw-as-bag.withdraw-as-purse")));
                     });
             RoyaleEconomy.dataManager.addMoneyToFile(p.getUniqueId().toString(), amount);
+            RoyaleEconomy.dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), amount);
             return;
         }
+        RoyaleEconomy.dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), amount);
+        if(plugin.bankLogger != null)
+            plugin.bankLogger.getLogger().info("[WITHDRAW BAG] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + amount + " coins.");
         ItemStack bag = MoneyBag.generateMoneyBag(amount);
         Utils.runOnPlayer(p, () -> {
             if (p.isOnline())

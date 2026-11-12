@@ -51,20 +51,8 @@
               <shadedPattern>me.qKing12.RoyaleEconomy.utils</shadedPattern>
             </relocation>
             <relocation>
-              <pattern>de.rapha149.signgui</pattern>
-              <shadedPattern>me.qKing12.RoyaleEconomy.signgui</shadedPattern>
-            </relocation>
-            <relocation>
               <pattern>org.slf4j</pattern>
               <shadedPattern>me.qKing12.RoyaleEconomy.slf4j</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>net.wesjd.anvilgui</pattern>
-              <shadedPattern>me.qKing12.RoyaleEconomy.AnvilGUI</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>redis.clients.jedis</pattern>
-              <shadedPattern>me.qKing12.RoyaleEconomy.jedis</shadedPattern>
             </relocation>
             <relocation>
               <pattern>com.tcoded.folialib</pattern>
@@ -137,12 +125,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.comphenix.protocol</groupId>
-      <artifactId>ProtocolLib</artifactId>
-      <version>4.7.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>world.bentobox</groupId>
       <artifactId>bentobox</artifactId>
       <version>2.3.0</version>
@@ -157,13 +139,19 @@
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>1.20.4-R0.1-SNAPSHOT</version>
+      <version>1.21.8-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.mojang</groupId>
       <artifactId>authlib</artifactId>
       <version>6.0.52</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+      <version>4.3.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

@@ -945,8 +945,11 @@ public class DataManagerMySQL implements DataManager {
         //RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
         try (
                 Connection Database = HikariCPDataSource.getConnection();
+                PreparedStatement insert = Database.prepareStatement("INSERT IGNORE INTO " + database + ".PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, 0, 0, '')");
                 PreparedStatement stmt = Database.prepareStatement("UPDATE " + database + ".PersonalBank SET coins = ? WHERE id = ?");
         ) {
+            insert.setString(1, player);
+            insert.executeUpdate();
             stmt.setDouble(1, amount);
             stmt.setString(2, player);
             stmt.executeUpdate();
@@ -970,8 +973,11 @@ public class DataManagerMySQL implements DataManager {
         //RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runAsync((task) -> {
         try (
                 Connection Database = HikariCPDataSource.getConnection();
+                PreparedStatement insert = Database.prepareStatement("INSERT IGNORE INTO " + database + ".PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, 0, 0, '')");
                 PreparedStatement stmt = Database.prepareStatement("UPDATE " + database + ".PersonalBank SET coins = coins +? WHERE id = ?");
         ) {
+            insert.setString(1, player);
+            insert.executeUpdate();
             stmt.setDouble(1, amount);
             stmt.setString(2, player);
             stmt.executeUpdate();
@@ -1292,6 +1298,7 @@ public class DataManagerMySQL implements DataManager {
                  PreparedStatement stmt1 = Database.prepareStatement("UPDATE " + database + ".PlayerPurse SET username = ? WHERE id = ?");
                  PreparedStatement stmt2 = Database.prepareStatement("INSERT INTO " + database + ".PlayerPurse VALUES (?, ? ,?, '')");
                  PreparedStatement stmt3 = Database.prepareStatement("INSERT INTO " + database + ".PersonalBank VALUES (?, ? , 0, '')");
+                 PreparedStatement stmt4 = Database.prepareStatement("INSERT IGNORE INTO " + database + ".PersonalBank (id, coins, upgrade, transactionlog) VALUES (?, ?, 0, '')");
             ) {
                 if (r.next()) {
                     String name = r.getString("username");
@@ -1312,6 +1319,12 @@ public class DataManagerMySQL implements DataManager {
                         stmt3.executeUpdate();
                     }
                 }
+
+                //Make sure an existing player always has a bank row. Without it
+                //the deposit update affects 0 rows and the money vanishes.
+                stmt4.setString(1, player.getUniqueId().toString());
+                stmt4.setDouble(2, RoyaleEconomy.staticValues.defaultBankCoins);
+                stmt4.executeUpdate();
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -2,7 +2,6 @@ package me.qKing12.RoyaleEconomy;
 
 import com.earth2me.essentials.Essentials;
 import com.tcoded.folialib.FoliaLib;
-import de.rapha149.signgui.SignGUI;
 import me.qKing12.RoyaleEconomy.API.APIHandler;
 import me.qKing12.RoyaleEconomy.API.Events.*;
 import me.qKing12.RoyaleEconomy.Commands.*;
@@ -16,20 +15,18 @@ import me.qKing12.RoyaleEconomy.Economy.BalanceTopNoEconomy;
 import me.qKing12.RoyaleEconomy.Events.Events;
 import me.qKing12.RoyaleEconomy.Hooks.*;
 import me.qKing12.RoyaleEconomy.Hooks.bStats.Metrics;
-import me.qKing12.RoyaleEconomy.InputGUIs.ChatListener;
+import me.qKing12.RoyaleEconomy.InputGUIs.PaperAmountDialog;
+import me.qKing12.RoyaleEconomy.InputGUIs.PaperDialogSupport;
 import me.qKing12.RoyaleEconomy.Menus.*;
 import me.qKing12.RoyaleEconomy.PlaceholderAPISupport.*;
 import me.qKing12.RoyaleEconomy.utils.*;
 import net.milkbowl.vault.economy.Economy;
-import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,7 +34,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 public class RoyaleEconomy extends JavaPlugin implements Listener {
 
@@ -132,413 +128,22 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
         }*/
     }
     
-    public String InputMethod;
-
     public void selectInputMethod(Player p, String inventoryType, double arg1, double arg2, String bankID){
-        if(InputMethod.equalsIgnoreCase("sign")){
-            try {
-                ArrayList<String> lore = new ArrayList<>();
-                lore.add("");
-                lore.addAll(this.getConfig().getStringList("input-guis." + inventoryType + ".lines"));
-                if(inventoryType.equals("deposit-coins")){
-                    SignGUI.builder().setLine(1, lore.get(0))
-                            .setLine(2, lore.get(1))
-                            .setLine(3, lore.get(2))
-                            .setHandler((player, lines) -> {
-                                String reply = lines.getLine(0);
+        if(!inventoryType.equals("deposit-coins") && !inventoryType.equals("withdraw-coins"))
+            return;
 
-                                {
-                                    boolean mainMenu=false;
-                                    try {
-                                        Double toDeposit = Math.abs(RoyaleEconomy.messageHelper.getCoinsFromFormat(reply));
-                                        toDeposit = messageHelper.useDecimals ? Math.floor(toDeposit*100) / 100 : Math.floor(toDeposit);
-                                        if(toDeposit>arg1)
-                                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toDeposit))));
-                                        else{
-                                            Double bankBalance;
-                                            if(bankID!=null){
-                                                PreSharedBankDepositEvent event = new PreSharedBankDepositEvent(bankID, p, toDeposit, true);
-                                                Bukkit.getPluginManager().callEvent(event);
-                                                if(event.isCancelled())
-                                                    return Collections.emptyList();
-
-                                                bankBalance = dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
-                                                if (bankBalance + toDeposit > arg2) {
-                                                    toDeposit = arg2 - bankBalance;
-                                                    mainMenu=true;
-                                                }
-                                                if(dataManager.removeMoneyFromFile(p.getUniqueId().toString(), toDeposit)) {
-                                                    dataManager.getSharedBankManager().addSharedBankMoneyToFile(bankID, toDeposit);
-                                                    if(plugin.bankLogger != null)
-                                                        plugin.bankLogger.getLogger().info("[DEPOSIT SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
-                                                    final double toDepositFinal = toDeposit;
-                                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
-                                                    RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", toDeposit);
-                                                }
-                                            }
-                                            else {
-                                                PreBankDepositEvent event = new PreBankDepositEvent(p, toDeposit, true);
-                                                Bukkit.getPluginManager().callEvent(event);
-                                                if(event.isCancelled())
-                                                    return Collections.emptyList();
-
-                                                bankBalance = dataManager.getBankMoneyFromFile(p.getUniqueId().toString());
-                                                if (bankBalance + toDeposit > arg2) {
-                                                    toDeposit = arg2 - bankBalance;
-                                                    mainMenu=true;
-                                                }
-                                                if(dataManager.removeMoneyFromFile(p.getUniqueId().toString(), toDeposit)) {
-                                                    dataManager.addBankMoneyToFile(p.getUniqueId().toString(), toDeposit);
-                                                    if(plugin.bankLogger != null)
-                                                        plugin.bankLogger.getLogger().info("[DEPOSIT VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
-                                                    final double toDepositFinal = toDeposit;
-                                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
-                                                    RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&a+", toDeposit);
-                                                }
-                                            }
-                                            Utils.playSound(p, "menus.bank-deposit");
-                                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.success-message").replace("%amount%", messageHelper.numberFormat(toDeposit))));
-                                        }
-                                    }catch(NumberFormatException e){
-                                        //e.printStackTrace();
-                                        PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.invalid-number")));
-                                    }
-                                    if(mainMenu){
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                                            if (bankID == null)
-                                                new MainBankMenu(p);
-                                            else
-                                                new SharedMainBankMenu(p);
-                                        }, 5);
-                                    }
-                                    else {
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                                            if (bankID == null)
-                                                new BankDepositMenu(p);
-                                            else
-                                                new SharedBankDepositMenu(p);
-                                        }, 5);
-                                    }
-                                    return Collections.emptyList();
-                                }
-                            })
-                            .build()
-                            .open(p);
-
-                }
-                else if(inventoryType.equals("withdraw-coins")){
-                    SignGUI.builder().setLine(1, lore.get(0))
-                            .setLine(2, lore.get(1))
-                            .setLine(3, lore.get(2))
-                            .setHandler((player, lines) -> {
-                                String reply = lines.getLine(0);
-
-                                {
-                                    boolean mainMenu=false;
-                                    try {
-                                        double toWithdraw2 = Math.abs(RoyaleEconomy.messageHelper.getCoinsFromFormat(reply));
-                                        double toWithdraw = messageHelper.useDecimals ? Math.floor(toWithdraw2*100) / 100 : Math.floor(toWithdraw2);
-                                        if(toWithdraw>arg1)
-                                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                                        else{
-                                            if(toWithdraw==arg1)
-                                                mainMenu=true;
-                                            if(bankID!=null){
-                                                PreSharedBankWithdrawEvent event = new PreSharedBankWithdrawEvent(bankID, p, toWithdraw, true);
-                                                Bukkit.getPluginManager().callEvent(event);
-                                                if(event.isCancelled())
-                                                    return Collections.emptyList();
-
-                                                if (arg2 == 1 && p.getInventory().firstEmpty()!=-1)
-                                                    SharedBankWithdrawMenu.tryBagCreator(toWithdraw, p, bankID);
-                                                else {
-                                                    if(dataManager.getSharedBankManager().removeSharedBankMoneyToFile(bankID, toWithdraw))
-                                                        dataManager.addMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                                    if(plugin.bankLogger != null)
-                                                        plugin.bankLogger.getLogger().info("[WITHDRAW SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
-                                                }
-                                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
-                                                RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&c-", toWithdraw);
-                                            }
-                                            else {
-                                                PreBankWithdrawEvent event = new PreBankWithdrawEvent(p, toWithdraw, true);
-                                                Bukkit.getPluginManager().callEvent(event);
-                                                if(event.isCancelled())
-                                                    return Collections.emptyList();
-
-                                                if (arg2 == 1 && p.getInventory().firstEmpty()!=-1)
-                                                    BankWithdrawMenu.tryBagCreator(toWithdraw, p);
-                                                else {
-                                                    dataManager.addMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                                    dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                                    if(plugin.bankLogger != null)
-                                                        plugin.bankLogger.getLogger().info("[WITHDRAW VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
-                                                }
-                                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
-                                                RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&c-", toWithdraw);
-                                            }
-                                            Utils.playSound(p, "menus.bank-withdraw");
-                                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.success-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                                        }
-                                    }catch(NumberFormatException e){
-                                        //e.printStackTrace();
-                                        PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.invalid-number")));
-                                    }
-
-                                    if(mainMenu){
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                                            if (bankID == null)
-                                                new MainBankMenu(p);
-                                            else
-                                                new SharedMainBankMenu(p);
-                                        }, 5);
-                                    }
-                                    else {
-                                        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                                            if (bankID == null)
-                                                new BankWithdrawMenu(p);
-                                            else
-                                                new SharedBankWithdrawMenu(p);
-                                        }, 5);
-                                    }
-                                    return Collections.emptyList();
-                                }
-                            })
-                            .build()
-                            .open(p);}}catch(Exception x){
-                x.printStackTrace();
-                this.getLogger().warning("An error has occured on the Sign GUIs. Make sure you have ProtocolLib installed.");
-            }
+        if(!PaperDialogSupport.isAvailable()) {
+            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, getConfig().getString("input-guis.dialog.unsupported-server",
+                    "&cThis server does not support Paper dialogs. Please use Paper 1.21.7 or newer.")));
+            return;
         }
-        else if(InputMethod.equalsIgnoreCase("anvil")){
-            ArrayList<String> lore = new ArrayList<>();
-            for(String line : this.getConfig().getStringList("input-guis."+inventoryType+".lines"))
-                lore.add(utilsAPI.chat(p, line));
-            ItemStack paper = RoyaleEconomy.itemConstructor.getItem(Material.PAPER, " ", lore);
-            if(inventoryType.equals("deposit-coins")){
-                new AnvilGUI.Builder()
-                        .onClose(player -> {
-                            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                                if (bankID == null)
-                                    new BankDepositMenu(player.getPlayer());
-                                else
-                                    new SharedBankDepositMenu(player.getPlayer());
-                            }, 5);
-                        })
-                        .onClick((slot, reply) -> {
-                            try {
-                                if(slot != AnvilGUI.Slot.OUTPUT) {
-                                    return Collections.emptyList();
-                                }
 
-                                Double toDeposit = Math.abs(RoyaleEconomy.messageHelper.getCoinsFromFormat(reply.getText()));
-                                toDeposit = messageHelper.useDecimals ? Math.floor(toDeposit*100) / 100 : Math.floor(toDeposit);
-                                if(toDeposit>arg1)
-                                    PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toDeposit))));
-                                else{
-                                    Double bankBalance;
-                                    if(bankID!=null){
-                                        bankBalance = dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
-                                        if (bankBalance + toDeposit > arg2)
-                                            toDeposit = arg2 - bankBalance;
-                                        if(dataManager.removeMoneyFromFile(p.getUniqueId().toString(), toDeposit)) {
-                                            dataManager.getSharedBankManager().addSharedBankMoneyToFile(bankID, toDeposit);
-                                            if(plugin.bankLogger != null)
-                                                plugin.bankLogger.getLogger().info("[DEPOSIT SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
-                                            final double toDepositFinal = toDeposit;
-                                            Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
-                                            RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", toDeposit);
-                                        }
-                                    }
-                                    else {
-                                        bankBalance = dataManager.getBankMoneyFromFile(p.getUniqueId().toString());
-                                        if (bankBalance + toDeposit > arg2)
-                                            toDeposit = arg2 - bankBalance;
-                                        if(dataManager.removeMoneyFromFile(p.getUniqueId().toString(), toDeposit)) {
-                                            dataManager.addBankMoneyToFile(p.getUniqueId().toString(), toDeposit);
-                                            if(plugin.bankLogger != null)
-                                                plugin.bankLogger.getLogger().info("[DEPOSIT VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
-                                            final double toDepositFinal = toDeposit;
-                                            Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
-                                            RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&a+", toDeposit);
-                                        }
-                                    }
-                                    Utils.playSound(p, "menus.bank-deposit");
-                                    PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.success-message").replace("%amount%", messageHelper.numberFormat(toDeposit))));
-                                }
-                            }catch(Exception e){
-                                PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.invalid-number")));
-                            }
-                            return Collections.singletonList(AnvilGUI.ResponseAction.close());
-                        })
-                        .itemLeft(paper)
-                        .title(" ")
-                        .text(" ")
-                        .plugin(this)
-                        .open(p);
-            }
-            else if(inventoryType.equals("withdraw-coins")){
-                new AnvilGUI.Builder()
-                        .onClose(player -> {
-                            RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                                if (bankID == null)
-                                    new BankWithdrawMenu(p);
-                                else
-                                    new SharedBankWithdrawMenu(p);
-                            }, 5);
-                        })
-                        .onClick((slot, reply) -> {
-                            try {
-                                if(slot != AnvilGUI.Slot.OUTPUT) {
-                                    return Collections.emptyList();
-                                }
-
-                                double toWithdraw2 = Math.abs(RoyaleEconomy.messageHelper.getCoinsFromFormat(reply.getText()));
-                                double toWithdraw = messageHelper.useDecimals ? Math.floor(toWithdraw2*100) / 100 : Math.floor(toWithdraw2);
-                                if(toWithdraw>arg1)
-                                    PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                                else{
-                                    if(bankID!=null){
-                                        if (arg2 == 1 && p.getInventory().firstEmpty()!=-1)
-                                            SharedBankWithdrawMenu.tryBagCreator(toWithdraw, p, bankID);
-                                        else {
-                                            if(dataManager.getSharedBankManager().removeSharedBankMoneyToFile(bankID, toWithdraw))
-                                                dataManager.addMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                            if(plugin.bankLogger != null)
-                                                plugin.bankLogger.getLogger().info("[WITHDRAW SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
-                                        }
-                                        Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
-                                        RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&c-", toWithdraw);
-                                    }
-                                    else {
-                                        if (arg2 == 1 && p.getInventory().firstEmpty()!=-1)
-                                            BankWithdrawMenu.tryBagCreator(toWithdraw, p);
-                                        else {
-                                            dataManager.addMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                            dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                            if(plugin.bankLogger != null)
-                                                plugin.bankLogger.getLogger().info("[WITHDRAW VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
-                                        }
-                                        Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
-                                        RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&c-", toWithdraw);
-                                    }
-                                    Utils.playSound(p, "menus.bank-withdraw");
-                                    PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.success-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                                }
-                            }catch(Exception e){
-                                PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.invalid-number")));
-                            }
-                            return Collections.singletonList(AnvilGUI.ResponseAction.close());
-                        })
-                        .itemLeft(paper)
-                        .title(" ")
-                        .text(" ")
-                        .plugin(this)
-                        .open(p);
-            }
-        }
-        else{
-            p.closeInventory();
-            for(String line : this.getConfig().getStringList("input-guis."+inventoryType+".lines"))
-                PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, line));
-            if(inventoryType.equals("deposit-coins")){
-                new ChatListener(p, (reply) -> {
-                    try {
-                        Double toDeposit = Math.abs(RoyaleEconomy.messageHelper.getCoinsFromFormat(reply));
-                        toDeposit = messageHelper.useDecimals ? Math.floor(toDeposit*100) / 100 : Math.floor(toDeposit);
-                        if(toDeposit>arg1)
-                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toDeposit))));
-                        else{
-                            Double bankBalance;
-                            if(bankID!=null){
-                                bankBalance = dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
-                                if (bankBalance + toDeposit > arg2)
-                                    toDeposit = arg2 - bankBalance;
-                                if(dataManager.removeMoneyFromFile(p.getUniqueId().toString(), toDeposit)) {
-                                    dataManager.getSharedBankManager().addSharedBankMoneyToFile(bankID, toDeposit);
-                                    if(plugin.bankLogger != null)
-                                        plugin.bankLogger.getLogger().info("[DEPOSIT SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
-                                    final double toDepositFinal = toDeposit;
-                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankDepositEvent(p, toDepositFinal)));
-                                    RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&a+", toDeposit);
-                                }
-                            }
-                            else {
-                                bankBalance = dataManager.getBankMoneyFromFile(p.getUniqueId().toString());
-                                if (bankBalance + toDeposit > arg2)
-                                    toDeposit = arg2 - bankBalance;
-                                if(dataManager.removeMoneyFromFile(p.getUniqueId().toString(), toDeposit)) {
-                                    dataManager.addBankMoneyToFile(p.getUniqueId().toString(), toDeposit);
-                                    if(plugin.bankLogger != null)
-                                        plugin.bankLogger.getLogger().info("[DEPOSIT VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " deposited " + toDeposit + " coins.");
-                                    final double toDepositFinal = toDeposit;
-                                    Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankDepositEvent(p, toDepositFinal)));
-                                    RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&a+", toDeposit);
-                                }
-                            }
-                            Utils.playSound(p, "menus.bank-deposit");
-                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.success-message").replace("%amount%", messageHelper.numberFormat(toDeposit))));
-                        }
-                    }catch(Exception e){
-                        PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.deposit-coins.invalid-number")));
-                    }
-                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                        if (bankID == null)
-                            new BankDepositMenu(p);
-                        else
-                            new SharedBankDepositMenu(p);
-                    }, 5);
-                });
-            }
-            else if(inventoryType.equals("withdraw-coins")){
-                new ChatListener(p, (reply) ->{
-                    try {
-                        double toWithdraw2 = Math.abs(RoyaleEconomy.messageHelper.getCoinsFromFormat(reply));
-                        double toWithdraw = messageHelper.useDecimals ? Math.floor(toWithdraw2*100) / 100 : Math.floor(toWithdraw2);
-                        if(toWithdraw>arg1)
-                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                        else{
-                            if(bankID!=null){
-                                if (arg2 == 1 && p.getInventory().firstEmpty()!=-1)
-                                    SharedBankWithdrawMenu.tryBagCreator(toWithdraw, p, bankID);
-                                else {
-                                    if(dataManager.getSharedBankManager().removeSharedBankMoneyToFile(bankID, toWithdraw))
-                                        dataManager.addMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                    if(plugin.bankLogger != null)
-                                        plugin.bankLogger.getLogger().info("[WITHDRAW SHARED VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
-                                    else {
-                                        PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                                    }
-                                }
-                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(p, toWithdraw)));
-                                RoyaleEconomy.dataManager.getSharedBankManager().addSharedTransactionLog(bankID, p.getName(), "&c-", toWithdraw);
-                            }
-                            else {
-                                if (arg2 == 1 && p.getInventory().firstEmpty()!=-1)
-                                    BankWithdrawMenu.tryBagCreator(toWithdraw, p);
-                                else {
-                                    dataManager.addMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                    dataManager.removeBankMoneyToFile(p.getUniqueId().toString(), toWithdraw);
-                                    if(plugin.bankLogger != null)
-                                        plugin.bankLogger.getLogger().info("[WITHDRAW VIA CUSTOM AMOUNT] " + p.getName() + " (" + p.getUniqueId() +")" + " withdrew " + toWithdraw + " coins.");
-                                }
-                                Utils.runOnPlayer(p, () -> Bukkit.getPluginManager().callEvent(new BankWithdrawEvent(p, toWithdraw)));
-                                RoyaleEconomy.dataManager.addTransactionLog(p.getUniqueId().toString(), p.getName(), "&c-", toWithdraw);
-                            }
-                            Utils.playSound(p, "menus.bank-withdraw");
-                            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.success-message").replace("%amount%", messageHelper.numberFormat(toWithdraw))));
-                        }
-                    }catch(Exception e){
-                        PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.invalid-number")));
-                    }
-                    RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runLaterAsync(() -> {
-                        if (bankID == null)
-                            new BankWithdrawMenu(p);
-                        else
-                            new SharedBankWithdrawMenu(p);
-                    }, 5);
-                });
-            }
+        try {
+            PaperAmountDialog.open(p, inventoryType, arg1, arg2, bankID);
+        } catch (Throwable throwable) {
+            getLogger().warning("Could not open the Paper amount dialog: " + throwable.getMessage());
+            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, getConfig().getString("input-guis.dialog.unsupported-server",
+                    "&cThis server does not support Paper dialogs. Please use Paper 1.21.7 or newer.")));
         }
     }
 
@@ -595,7 +200,6 @@ public class RoyaleEconomy extends JavaPlugin implements Listener {
             return;
         disabledCommand=new DisabledCommand();
         noEconomy=getConfig().getBoolean("no-economy");
-        InputMethod=getConfig().getString("input-guis.input-type");
 
         if(getConfig().getBoolean("use-bank-logs")) {
             bankLogger = new BankLogger();

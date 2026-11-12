@@ -111,30 +111,78 @@ short-time-units:
   second: 's'
 
 input-guis:
-  #What kind of input would you like? 3 Avalabile
-  #1. 'sign'
-  #2. 'anvil'
-  #3. 'chat'
-  input-type: 'sign'
-  #If you use chat setting, this message will be shown
-  #after 20 seconds of opening the chat listener
-  chat-listener-end-message: '&cYou took too long to enter an input.'
-  deposit-coins:
-    lines:
-      - '^^^^^^^^^^^^^^^^'
-      - 'Enter the amount'
-      - 'to deposit'
-    success-message: '&fYou have deposited &6%amount% coins &fin your bank!'
-    fail-message: '&fYou don''t have &6%amount% coins &fin your purse!'
-    invalid-number: '&cPlease enter a valid number.'
-  withdraw-coins:
-    lines:
-      - '^^^^^^^^^^^^^^^^'
-      - 'Enter the amount'
-      - 'to withdraw'
-    success-message: '&fYou have withdrawn &6%amount% coins &ffrom your bank!'
-    fail-message: '&fYou don''t have &6%amount% coins &fin your bank!'
-    invalid-number: '&cPlease enter a valid number.'
+  #Amount input uses Paper dialogs only (Paper 1.21.7+).
+  #Every text below supports & colour codes.
+  #Available placeholders:
+  #  %player%      - player name
+  #  %balance%     - purse (deposit) / bank balance (withdraw)
+  #  %limit%       - bank limit (deposit)
+  #  %amount%      - amount involved in the transaction (messages only)
+  dialog:
+    #Shown when the server does not have the Paper Dialog API.
+    unsupported-server: '&cThis server does not support Paper dialogs. Please use Paper 1.21.7 or newer.'
+
+    deposit:
+      title: '&8Deposit coins'
+      #Leave empty to use only the title above.
+      external-title: ''
+      can-close-with-escape: true
+      #Pause the game while the dialog is open (single-player only).
+      pause: false
+      #CLOSE, NONE or WAIT_FOR_RESPONSE.
+      after-action: CLOSE
+      #One entry per line in the dialog body.
+      body:
+        - '&7Available: &6%balance%'
+        - '&7Bank limit: &6%limit%'
+      input:
+        label: '&eAmount'
+        #Show the label above the text field.
+        label-visible: true
+        #Initial text inside the field. Empty means no initial text.
+        initial: ''
+        #Maximum number of typed characters.
+        max-length: 32
+        #Width of the input field.
+        width: 300
+      confirm-button:
+        label: '&aConfirm'
+        tooltip: '&7Click to deposit the amount.'
+        width: 100
+      cancel-button:
+        label: '&cCancel'
+        tooltip: '&7Click to cancel.'
+        width: 100
+      #Messages use %amount% and the placeholders above.
+      success-message: '&fYou have deposited &6%amount% coins &fin your bank!'
+      fail-message: '&fYou don''t have &6%amount% coins &fin your purse!'
+      invalid-number: '&cPlease enter a valid number.'
+
+    withdraw:
+      title: '&8Withdraw coins'
+      external-title: ''
+      can-close-with-escape: true
+      pause: false
+      after-action: CLOSE
+      body:
+        - '&7Available: &6%balance%'
+      input:
+        label: '&eAmount'
+        label-visible: true
+        initial: ''
+        max-length: 32
+        width: 300
+      confirm-button:
+        label: '&aConfirm'
+        tooltip: '&7Click to withdraw the amount.'
+        width: 100
+      cancel-button:
+        label: '&cCancel'
+        tooltip: '&7Click to cancel.'
+        width: 100
+      success-message: '&fYou have withdrawn &6%amount% coins &ffrom your bank!'
+      fail-message: '&fYou don''t have &6%amount% coins &fin your bank!'
+      invalid-number: '&cPlease enter a valid number.'
 
 piggy-bank:
   use-piggy-banks: true

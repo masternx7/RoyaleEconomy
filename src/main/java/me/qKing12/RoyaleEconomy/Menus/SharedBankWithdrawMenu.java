@@ -58,8 +58,11 @@ public class SharedBankWithdrawMenu {
                     p.getInventory().addItem(bag);
             });
             Utils.runOnPlayer(p, () -> PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.moneybag.output").replace("%amount%", RoyaleEconomy.messageHelper.numberFormat(amount)))));
-        } else
-            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.plugin.getConfig().getString("input-guis.withdraw-coins.fail-message").replace("%amount%", messageHelper.numberFormat(amount))));
+        } else {
+            String failMessage = RoyaleEconomy.plugin.getConfig().getString("input-guis.dialog.withdraw.fail-message",
+                    "&fYou don't have &6%amount% coins &fin your bank!");
+            PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, failMessage.replace("%amount%", messageHelper.numberFormat(amount))));
+        }
     }
 
     public SharedBankWithdrawMenu(Player p) {

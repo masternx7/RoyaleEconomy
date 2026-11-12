@@ -74,6 +74,8 @@ public interface DataManager {
 
     ArrayList<String> getTransactionLogFromFile(String p);
 
+    ArrayList<BankTransaction> getTransactionLogEntries(String p);
+
     void addTransactionLog(String uuid, String byWho, String symbol, double amount);
 
     void loadTops();

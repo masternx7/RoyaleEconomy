@@ -1,5 +1,6 @@
 package me.qKing12.RoyaleEconomy.Commands;
 
+import me.qKing12.RoyaleEconomy.InputGUIs.PaperAmountDialog;
 import me.qKing12.RoyaleEconomy.Menus.BankUpgradesMenu;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.Menus.BankDepositMenu;
@@ -103,14 +104,21 @@ public class BankCommand implements TabExecutor {
                     }
                     else if(args[0].equalsIgnoreCase("deposit")){
                         if(PermissionChecker.checkPermission("commands.bank.bank-deposit-command", p)) {
-                            if(!isInCooldown(p))
+                            if (args.length > 1) {
+                                Utils.runOnPlayer(p, () -> PaperAmountDialog.depositCommand(p, args[1], null));
+                            } else if(!isInCooldown(p)) {
                                 new BankDepositMenu(p);
+                            }
                         }
                     }
                     else if(args[0].equalsIgnoreCase("withdraw")){
-                        if(PermissionChecker.checkPermission("commands.bank.bank-withdraw-command", p))
-                            if(!isInCooldown(p))
+                        if(PermissionChecker.checkPermission("commands.bank.bank-withdraw-command", p)) {
+                            if (args.length > 1) {
+                                Utils.runOnPlayer(p, () -> PaperAmountDialog.withdrawCommand(p, args[1], null));
+                            } else if(!isInCooldown(p)) {
                                 new BankWithdrawMenu(p);
+                            }
+                        }
                     }
                     else{
                         if(PermissionChecker.checkPermission("commands.bank.command-help", p)) {

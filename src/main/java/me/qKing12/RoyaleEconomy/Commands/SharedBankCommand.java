@@ -1,6 +1,7 @@
 package me.qKing12.RoyaleEconomy.Commands;
 
 import me.qKing12.RoyaleEconomy.DataManager.StaticValues;
+import me.qKing12.RoyaleEconomy.InputGUIs.PaperAmountDialog;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.Menus.*;
 import me.qKing12.RoyaleEconomy.utils.PermissionChecker;
@@ -123,15 +124,33 @@ public class SharedBankCommand implements TabExecutor {
                     return true;
                 }
                 else if(args[0].equalsIgnoreCase("deposit")){
-                    if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-deposit-command", p))
-                        if(!isInCooldown(p))
+                    if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-deposit-command", p)) {
+                        if (args.length > 1) {
+                            String bankID = RoyaleEconomy.dataManager.getSharedBankManager().getSharedBankId(p.getUniqueId().toString());
+                            if (bankID == null || bankID.isEmpty()) {
+                                PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.sharedbank.no-shared-bank")));
+                            } else {
+                                Utils.runOnPlayer(p, () -> PaperAmountDialog.depositCommand(p, args[1], bankID));
+                            }
+                        } else if(!isInCooldown(p)) {
                             new SharedBankDepositMenu(p);
+                        }
+                    }
                     return true;
                 }
                 else if(args[0].equalsIgnoreCase("withdraw")){
-                    if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-withdraw-command", p))
-                        if(!isInCooldown(p))
+                    if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-withdraw-command", p)) {
+                        if (args.length > 1) {
+                            String bankID = RoyaleEconomy.dataManager.getSharedBankManager().getSharedBankId(p.getUniqueId().toString());
+                            if (bankID == null || bankID.isEmpty()) {
+                                PlayerMessageHandler.messageSend(p, utilsAPI.chat(p, RoyaleEconomy.commandsCfg.getString("commands.sharedbank.no-shared-bank")));
+                            } else {
+                                Utils.runOnPlayer(p, () -> PaperAmountDialog.withdrawCommand(p, args[1], bankID));
+                            }
+                        } else if(!isInCooldown(p)) {
                             new SharedBankWithdrawMenu(p);
+                        }
+                    }
                     return true;
                 }
                 else if(args[0].equalsIgnoreCase("create")){

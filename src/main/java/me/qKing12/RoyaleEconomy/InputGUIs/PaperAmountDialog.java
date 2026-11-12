@@ -41,9 +41,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import static me.qKing12.RoyaleEconomy.RoyaleEconomy.bankUpgradesCfg;
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.dataManager;
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.messageHelper;
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.plugin;
+import static me.qKing12.RoyaleEconomy.RoyaleEconomy.staticValues;
 import static me.qKing12.RoyaleEconomy.RoyaleEconomy.utilsAPI;
 
 /**
@@ -119,6 +121,50 @@ public final class PaperAmountDialog {
         return true;
     }
 
+    /**
+     * Direct command input. These methods do not open or reopen any menu.
+     */
+    public static void depositCommand(Player player, String amountText, String bankID) {
+        if (player == null || !player.isOnline())
+            return;
+
+        Double purseAmount = dataManager.getMoneyFromFile(player.getUniqueId().toString());
+        double purse = purseAmount == null ? 0 : purseAmount;
+        if (purse < 0)
+            purse = 0;
+
+        processDeposit(player, amountText, purse, getMaximumCoins(player, bankID), bankID, false);
+    }
+
+    public static void withdrawCommand(Player player, String amountText, String bankID) {
+        if (player == null || !player.isOnline())
+            return;
+
+        processWithdraw(player, amountText, getBankBalance(player, bankID), 0, bankID, false);
+    }
+
+    private static double getMaximumCoins(Player player, String bankID) {
+        int upgrade;
+        String path;
+
+        if (bankID == null) {
+            upgrade = dataManager.getBankUpgrade(player.getUniqueId().toString());
+            path = "bank-upgrades.";
+        } else {
+            upgrade = dataManager.getSharedBankManager().getSharedBankUpgrade(bankID);
+            path = "shared-bank-upgrades.";
+        }
+
+        return bankUpgradesCfg.getDouble(path + upgrade + ".maximum-balance");
+    }
+
+    private static double getBankBalance(Player player, String bankID) {
+        Double balance = bankID == null
+                ? dataManager.getBankMoneyFromFile(player.getUniqueId().toString())
+                : dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
+        return balance == null ? 0 : balance;
+    }
+
     private static List<DialogBody> buildBody(Player player, FileConfiguration config, String base,
                                               boolean deposit, double balance, double limit) {
         List<String> lines = config.contains(base + ".body")
@@ -178,9 +224,9 @@ public final class PaperAmountDialog {
                 return;
             ((Audience) player).closeDialog();
             if (inventoryType.equals("deposit-coins"))
-                processDeposit(player, text, arg1, arg2, bankID);
+                processDeposit(player, text, arg1, arg2, bankID, true);
             else
-                processWithdraw(player, text, arg1, arg2, bankID);
+                processWithdraw(player, text, arg1, arg2, bankID, true);
         });
     }
 
@@ -197,12 +243,13 @@ public final class PaperAmountDialog {
         });
     }
 
-    private static void processDeposit(Player player, String reply, double purse, double maximumCoins, String bankID) {
+    private static void processDeposit(Player player, String reply, double purse, double maximumCoins, String bankID, boolean reopenMenus) {
         String base = "input-guis.dialog.deposit";
 
         if (reply == null || reply.trim().isEmpty()) {
             send(player, base, "invalid-number", DEFAULT_INVALID_NUMBER, purse, maximumCoins, 0);
-            reopen(player, "deposit-coins", false, bankID);
+            if (reopenMenus)
+                reopen(player, "deposit-coins", false, bankID);
             return;
         }
 
@@ -220,20 +267,25 @@ public final class PaperAmountDialog {
                 send(player, base, "fail-message", DEFAULT_DEPOSIT_FAIL, purse, maximumCoins, amount);
             } else {
                 if (bankID != null) {
-                    PreSharedBankDepositEvent event = new PreSharedBankDepositEvent(bankID, player, amount, true);
+                    PreSharedBankDepositEvent event = new PreSharedBankDepositEvent(bankID, player, amount, false);
                     Bukkit.getPluginManager().callEvent(event);
                     if (event.isCancelled()) {
-                        reopen(player, "deposit-coins", false, bankID);
+                        if (reopenMenus)
+                            reopen(player, "deposit-coins", false, bankID);
                         return;
                     }
 
-                    double bankBalance = dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
+                    Double sharedBalance = dataManager.getSharedBankManager().getSharedBankMoneyFromFile(bankID);
+                    double bankBalance = sharedBalance == null ? 0 : sharedBalance;
                     if (bankBalance + amount > maximumCoins) {
                         amount = maximumCoins - bankBalance;
                         mainMenu = true;
                     }
                     if (amount <= 0) {
-                        reopen(player, "deposit-coins", true, bankID);
+                        if (reopenMenus)
+                            reopen(player, "deposit-coins", true, bankID);
+                        else
+                            PlayerMessageHandler.messageSend(player, staticValues.bankFull);
                         return;
                     }
 
@@ -247,20 +299,25 @@ public final class PaperAmountDialog {
                         success = true;
                     }
                 } else {
-                    PreBankDepositEvent event = new PreBankDepositEvent(player, amount, true);
+                    PreBankDepositEvent event = new PreBankDepositEvent(player, amount, false);
                     Bukkit.getPluginManager().callEvent(event);
                     if (event.isCancelled()) {
-                        reopen(player, "deposit-coins", false, bankID);
+                        if (reopenMenus)
+                            reopen(player, "deposit-coins", false, bankID);
                         return;
                     }
 
-                    double bankBalance = dataManager.getBankMoneyFromFile(player.getUniqueId().toString());
+                    Double personalBalance = dataManager.getBankMoneyFromFile(player.getUniqueId().toString());
+                    double bankBalance = personalBalance == null ? 0 : personalBalance;
                     if (bankBalance + amount > maximumCoins) {
                         amount = maximumCoins - bankBalance;
                         mainMenu = true;
                     }
                     if (amount <= 0) {
-                        reopen(player, "deposit-coins", true, bankID);
+                        if (reopenMenus)
+                            reopen(player, "deposit-coins", true, bankID);
+                        else
+                            PlayerMessageHandler.messageSend(player, staticValues.bankFull);
                         return;
                     }
 
@@ -286,15 +343,17 @@ public final class PaperAmountDialog {
             send(player, base, "invalid-number", DEFAULT_INVALID_NUMBER, purse, maximumCoins, amount);
         }
 
-        reopen(player, "deposit-coins", mainMenu, bankID);
+        if (reopenMenus)
+            reopen(player, "deposit-coins", mainMenu, bankID);
     }
 
-    private static void processWithdraw(Player player, String reply, double bankBalance, double withdrawAsBag, String bankID) {
+    private static void processWithdraw(Player player, String reply, double bankBalance, double withdrawAsBag, String bankID, boolean reopenMenus) {
         String base = "input-guis.dialog.withdraw";
 
         if (reply == null || reply.trim().isEmpty()) {
             send(player, base, "invalid-number", DEFAULT_INVALID_NUMBER, bankBalance, bankBalance, 0);
-            reopen(player, "withdraw-coins", false, bankID);
+            if (reopenMenus)
+                reopen(player, "withdraw-coins", false, bankID);
             return;
         }
 
@@ -313,10 +372,11 @@ public final class PaperAmountDialog {
                     mainMenu = true;
 
                 if (bankID != null) {
-                    PreSharedBankWithdrawEvent event = new PreSharedBankWithdrawEvent(bankID, player, amount, true);
+                    PreSharedBankWithdrawEvent event = new PreSharedBankWithdrawEvent(bankID, player, amount, false);
                     Bukkit.getPluginManager().callEvent(event);
                     if (event.isCancelled()) {
-                        reopen(player, "withdraw-coins", false, bankID);
+                        if (reopenMenus)
+                            reopen(player, "withdraw-coins", false, bankID);
                         return;
                     }
 
@@ -332,10 +392,11 @@ public final class PaperAmountDialog {
                     Utils.runOnPlayer(player, () -> Bukkit.getPluginManager().callEvent(new SharedBankWithdrawEvent(player, finalAmount)));
                     dataManager.getSharedBankManager().addSharedTransactionLog(bankID, player.getName(), "&c-", amount);
                 } else {
-                    PreBankWithdrawEvent event = new PreBankWithdrawEvent(player, amount, true);
+                    PreBankWithdrawEvent event = new PreBankWithdrawEvent(player, amount, false);
                     Bukkit.getPluginManager().callEvent(event);
                     if (event.isCancelled()) {
-                        reopen(player, "withdraw-coins", false, bankID);
+                        if (reopenMenus)
+                            reopen(player, "withdraw-coins", false, bankID);
                         return;
                     }
 
@@ -359,7 +420,8 @@ public final class PaperAmountDialog {
             send(player, base, "invalid-number", DEFAULT_INVALID_NUMBER, bankBalance, bankBalance, 0);
         }
 
-        reopen(player, "withdraw-coins", mainMenu, bankID);
+        if (reopenMenus)
+            reopen(player, "withdraw-coins", mainMenu, bankID);
     }
 
     private static void send(Player player, String base, String key, String defaultValue,

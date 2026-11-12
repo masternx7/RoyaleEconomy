@@ -1,5 +1,6 @@
 package me.qKing12.RoyaleEconomy.Commands;
 
+import me.qKing12.RoyaleEconomy.InputGUIs.PaperAmountDialog;
 import me.qKing12.RoyaleEconomy.RoyaleEconomy;
 import me.qKing12.RoyaleEconomy.Menus.*;
 import me.qKing12.RoyaleEconomy.utils.PermissionChecker;
@@ -51,15 +52,21 @@ public class OnlyBankCommand implements TabExecutor {
                         return true;
                     }
                     else if(args[0].equalsIgnoreCase("deposit")){
-                        if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-deposit-command", p))
-                            if(!SharedBankCommand.isInCooldown(p))
+                        if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-deposit-command", p)) {
+                            if (args.length > 1)
+                                Utils.runOnPlayer(p, () -> PaperAmountDialog.depositCommand(p, args[1], sharedBank));
+                            else if(!SharedBankCommand.isInCooldown(p))
                                 new SharedBankDepositMenu(p);
+                        }
                         return true;
                     }
                     else if(args[0].equalsIgnoreCase("withdraw")){
-                        if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-withdraw-command", p))
-                            if(!SharedBankCommand.isInCooldown(p))
+                        if(PermissionChecker.checkPermission("commands.sharedbank.sharedbank-withdraw-command", p)) {
+                            if (args.length > 1)
+                                Utils.runOnPlayer(p, () -> PaperAmountDialog.withdrawCommand(p, args[1], sharedBank));
+                            else if(!SharedBankCommand.isInCooldown(p))
                                 new SharedBankWithdrawMenu(p);
+                        }
                         return true;
                     }
                     else if(args[0].equalsIgnoreCase("create")){
@@ -282,14 +289,19 @@ public class OnlyBankCommand implements TabExecutor {
                         }
                         else if(args[0].equalsIgnoreCase("deposit")){
                             if(PermissionChecker.checkPermission("commands.bank.bank-deposit-command", p)) {
-                                if(!BankCommand.isInCooldown(p))
+                                if (args.length > 1)
+                                    Utils.runOnPlayer(p, () -> PaperAmountDialog.depositCommand(p, args[1], null));
+                                else if(!BankCommand.isInCooldown(p))
                                     new BankDepositMenu(p);
                             }
                         }
                         else if(args[0].equalsIgnoreCase("withdraw")){
-                            if(PermissionChecker.checkPermission("commands.bank.bank-withdraw-command", p))
-                                if(!BankCommand.isInCooldown(p))
+                            if(PermissionChecker.checkPermission("commands.bank.bank-withdraw-command", p)) {
+                                if (args.length > 1)
+                                    Utils.runOnPlayer(p, () -> PaperAmountDialog.withdrawCommand(p, args[1], null));
+                                else if(!BankCommand.isInCooldown(p))
                                     new BankWithdrawMenu(p);
+                            }
                         }
                         else{
                             if(PermissionChecker.checkPermission("commands.bank.command-help", p)) {

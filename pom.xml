@@ -59,10 +59,6 @@
                             <shadedPattern>me.qKing12.RoyaleEconomy.utils</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>com.zaxxer.hikari</pattern>
-                            <shadedPattern>me.qKing12.RoyaleEconomy.hikari</shadedPattern>
-                        </relocation>
-                        <relocation>
                             <pattern>de.tr7zw.annotations</pattern>
                             <shadedPattern>me.qKing12.RoyaleEconomy.utils</shadedPattern>
                         </relocation>
@@ -197,6 +193,7 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>4.0.3</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>

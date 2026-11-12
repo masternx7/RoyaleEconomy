@@ -1,5 +1,6 @@
 package me.qKing12.RoyaleEconomy.DataManager.SharedBank;
 
+import me.qKing12.RoyaleEconomy.DataManager.BankTransaction;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ public interface SharedBank {
     void setTable(String table);
 
     String getTable();
+
+    ArrayList<BankTransaction> getSharedTransactionLogEntries(String bankID);
 
     ArrayList<String> getSharedTransactionLogFromFile(String bankID);
 

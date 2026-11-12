@@ -64,6 +64,7 @@ public class PlaceholderRegisterNoEconomy extends PlaceholderExpansion implement
             sharedBankBalance.remove(e.getPlayer().getUniqueId().toString());
             bankUpgrade.remove(e.getPlayer().getUniqueId().toString());
             sharedBankUpgrade.remove(e.getPlayer().getUniqueId().toString());
+            TransactionPlaceholders.remove(e.getPlayer());
         });
     }
 
@@ -90,6 +91,11 @@ public class PlaceholderRegisterNoEconomy extends PlaceholderExpansion implement
                 }
             }
         }, 20, 20);
+
+        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runTimerAsync(() -> {
+            for (Player player : Bukkit.getOnlinePlayers())
+                TransactionPlaceholders.refresh(player);
+        }, 100, 100);
     }
 
     private boolean keepUpdated=false;
@@ -223,6 +229,10 @@ public class PlaceholderRegisterNoEconomy extends PlaceholderExpansion implement
                 return "N/A";
             }
         }
+
+        String transaction = TransactionPlaceholders.resolve(player, identifier);
+        if (transaction != null)
+            return transaction;
 
         return null;
     }

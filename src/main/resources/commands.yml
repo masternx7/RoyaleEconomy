@@ -241,8 +241,8 @@ commands:
       - '&e/bank &7- &fOpen the bank menu.'
       - '&e/bank balance &7- &fCheck the amount of coins you have.'
       - '&e/bank balance <player> &7- &fCheck the amount of coins another player has.'
-      - '&e/bank withdraw &7- &fOpen the withdraw menu'
-      - '&e/bank deposit &7- &fOpen the deposit menu'
+      - '&e/bank withdraw [amount] &7- &fOpen the withdraw menu or withdraw directly'
+      - '&e/bank deposit [amount] &7- &fOpen the deposit menu or deposit directly'
       - '&e/bank upgrades - &7- &fOpen the upgrades menu.'
     #Use %balance% for amount of coins
     output:  '&fYou have &6%balance% coins&f in your bank!'
@@ -263,8 +263,8 @@ commands:
       - '&e/sharedbank balance &7- &fCheck the amount of coins you have.'
       - '&e/sharedbank upgrades - &7- &fOpen the upgrades menu.'
       - '&e/sharedbank balance <player> &7- &fCheck the amount of coins another player has.'
-      - '&e/sharedbank withdraw &7- &fOpen the withdraw menu'
-      - '&e/sharedbank deposit &7- &fOpen the deposit menu'
+      - '&e/sharedbank withdraw [amount] &7- &fOpen the withdraw menu or withdraw directly'
+      - '&e/sharedbank deposit [amount] &7- &fOpen the deposit menu or deposit directly'
     #Use %balance% for amount of coins
     output:  '&fYou have &6%balance% coins&f in your bank!'
     #Use %player-name% for the name of the player

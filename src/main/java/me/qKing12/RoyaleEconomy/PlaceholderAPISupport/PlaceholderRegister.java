@@ -11,7 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlaceholderRegister extends PlaceholderExpansion implements Listener {
@@ -65,6 +64,7 @@ public class PlaceholderRegister extends PlaceholderExpansion implements Listene
             sharedBankBalance.remove(e.getPlayer());
             bankUpgrade.remove(e.getPlayer());
             sharedBankUpgrade.remove(e.getPlayer());
+            TransactionPlaceholders.remove(e.getPlayer());
         });
     }
 
@@ -85,6 +85,11 @@ public class PlaceholderRegister extends PlaceholderExpansion implements Listene
                 }
             }
         }, 20, 20);
+
+        RoyaleEconomy.plugin.getSchedulerLib().getScheduler().runTimerAsync(() -> {
+            for (Player player : Bukkit.getOnlinePlayers())
+                TransactionPlaceholders.refresh(player);
+        }, 100, 100);
     }
 
     private boolean keepUpdated=false;
@@ -229,6 +234,10 @@ public class PlaceholderRegister extends PlaceholderExpansion implements Listene
         else if(identifier.equals("sharedbank_member_count")){
             return String.valueOf(RoyaleEconomy.dataManager.getSharedBankManager().getMembersSharedBankPlayer(player.getUniqueId().toString(), true).size());
         }
+
+        String transaction = TransactionPlaceholders.resolve(player, identifier);
+        if (transaction != null)
+            return transaction;
 
         return null;
     }

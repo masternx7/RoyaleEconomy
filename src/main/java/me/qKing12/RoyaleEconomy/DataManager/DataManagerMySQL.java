@@ -1541,31 +1541,48 @@ public class DataManagerMySQL implements DataManager {
         );
     }
 
-    public ArrayList<String> getTransactionLogFromFile(String player) {
-        ArrayList<String> toReturn = new ArrayList<>();
+    public ArrayList<BankTransaction> getTransactionLogEntries(String player) {
+        ArrayList<BankTransaction> toReturn = new ArrayList<>();
         try (Connection Database = HikariCPDataSource.getConnection();
              ResultSet r = Database.prepareStatement("SELECT transactionlog FROM " + database + ".PersonalBank WHERE id = '" + player + "'").executeQuery();
         ) {
             if (r.next()) {
-                if (r.getString("transactionlog").equals("")) {
-                    for (String line : RoyaleEconomy.menusCfg.getStringList("menus.main-bank-menu.transaction-history.no-transaction-lore"))
-                        toReturn.add(Utils.chat(line));
-                } else {
-                    String[] temp = r.getString("transactionlog").substring(4).split("%nl%");
-                    for (String transaction : temp) {
-                        Long date = Long.parseLong(transaction.split("###")[0]);
-                        transaction = transaction.split("###")[1];
-                        toReturn.add(0, transaction.replace("%transaction-countdown%", RoyaleEconomy.messageHelper.formatTimeNotDetailed(ZonedDateTime.now().toInstant().toEpochMilli() - date)));
+                String transactionLog = r.getString("transactionlog");
+                if (transactionLog == null || transactionLog.isEmpty())
+                    return toReturn;
+
+                if (transactionLog.startsWith("%nl%"))
+                    transactionLog = transactionLog.substring(4);
+
+                String[] temp = transactionLog.split("%nl%");
+                for (String transaction : temp) {
+                    String[] parts = transaction.split("###");
+                    if (parts.length < 2)
+                        continue;
+                    try {
+                        toReturn.add(0, new BankTransaction(Long.parseLong(parts[0]), parts[1]));
+                    } catch (NumberFormatException ignored) {
                     }
                 }
-            } else {
-                for (String line : RoyaleEconomy.menusCfg.getStringList("menus.main-bank-menu.transaction-history.no-transaction-lore"))
-                    toReturn.add(Utils.chat(line));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        return toReturn;
+    }
+
+    public ArrayList<String> getTransactionLogFromFile(String player) {
+        ArrayList<String> toReturn = new ArrayList<>();
+        ArrayList<BankTransaction> entries = getTransactionLogEntries(player);
+        if (entries.isEmpty()) {
+            for (String line : RoyaleEconomy.menusCfg.getStringList("menus.main-bank-menu.transaction-history.no-transaction-lore"))
+                toReturn.add(Utils.chat(line));
+        } else {
+            long now = System.currentTimeMillis();
+            for (BankTransaction entry : entries)
+                toReturn.add(entry.format(now));
+        }
         return toReturn;
     }
 
